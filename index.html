@@ -1,54 +1,110 @@
 <!doctype html>
 <html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Часовой лимит 60/6 — рабочая панель</title>
+<title>Норма — счётчик часов 60/6</title>
 <style>
-:root{--bg:#f4f5f7;--card:#fff;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb}
-*{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:#111827;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-header b{font-size:17px}header .demo{background:#374151;border-radius:8px;padding:3px 10px;font-size:12px;color:#d1d5db}
-nav{display:flex;gap:4px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5}
-nav button{border:0;background:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--mut)}
-nav button.on{background:#eef2ff;color:var(--acc);font-weight:600}
-main{max-width:1100px;margin:20px auto;padding:0 16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+:root{
+ --bg:#f8fafc;--card:#ffffff;--ink:#0f172a;--mut:#64748b;--line:#e8edf4;
+ --acc:#4f46e5;--acc2:#7c3aed;--acc-soft:#eef2ff;--acc-line:#c7d2fe;
+ --ok:#059669;--ok-bg:#ecfdf5;--warn:#b45309;--warn-bg:#fffbeb;
+ --bad:#dc2626;--bad-bg:#fef2f2;--pause:#64748b;--pause-bg:#f1f5f9;
+ --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 14px rgba(15,23,42,.06);
+ --r:14px}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+body::before{content:'';display:block;height:4px;background:linear-gradient(90deg,#4f46e5,#7c3aed,#0ea5e9)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.logo .dot{color:var(--acc)}
+.tag606{background:var(--acc-soft);color:var(--acc);border:1px solid var(--acc-line);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
+.demo{background:#f1f5f9;border-radius:99px;padding:3px 10px;font-size:12px;color:#64748b}
+.note{margin-left:auto;font-size:12px;color:#94a3b8}
+nav{display:flex;gap:6px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5}
+nav button{border:1px solid transparent;background:none;padding:8px 15px;border-radius:99px;cursor:pointer;font-size:14px;color:var(--mut)}
+nav button.on{background:var(--acc-soft);color:var(--acc);font-weight:700;border-color:var(--acc-line)}
+main{max-width:1100px;margin:22px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
 .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.kpi{flex:1;min-width:140px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
-.kpi .n{font-size:26px;font-weight:700}.kpi .l{font-size:12px;color:var(--mut)}
-.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.kpi{flex:1;min-width:140px;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.kpi .n{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.kpi .l{font-size:12px;color:var(--mut)}
+.badge{display:inline-block;padding:5px 13px;border-radius:99px;font-size:12.5px;font-weight:700;white-space:nowrap}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);text-align:left;padding:8px 6px;border-bottom:2px solid var(--line)}
-td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);text-align:left;padding:9px 6px;border-bottom:2px solid var(--line)}
+td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
 td.num,th.num{text-align:center}
-td input{width:52px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;text-align:right;font:inherit}
-td input:focus{outline:2px solid #bfdbfe;border-color:var(--acc)}
-.btn{border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
-.btn.p{background:var(--acc);color:#fff}.btn.s{background:#eef2ff;color:var(--acc)}.btn.g{background:#f3f4f6;color:var(--ink)}
-.btn:hover{filter:brightness(.96)}
-input[type=text],input[type=tel],input[type=number],select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
-.bar{display:flex;align-items:flex-end;gap:6px;height:120px;margin:10px 0}
+td input{width:54px;padding:5px 7px;border:1px solid var(--line);border-radius:8px;text-align:right;font:inherit}
+td input:focus{outline:2px solid var(--acc-line);border-color:var(--acc)}
+.btn{border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+.btn.p{background:var(--acc);color:#fff;box-shadow:0 2px 6px rgba(79,70,229,.3)}
+.btn.p:hover{background:#4338ca}
+.btn.s{background:var(--acc-soft);color:var(--acc);border:1px solid var(--acc-line)}
+.btn.g{background:#f1f5f9;color:var(--ink);border:1px solid var(--line)}
+.btn.d{background:var(--bad-bg);color:var(--bad);border:1px solid #fecaca}
+.btn:hover{filter:brightness(.97)}
+input[type=text],input[type=tel],input[type=number],select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+input:focus,select:focus{outline:2px solid var(--acc-line);border-color:var(--acc)}
+.bar{display:flex;align-items:flex-end;gap:6px;height:130px;margin:12px 0}
 .bar>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
-.bar .b{width:100%;border-radius:6px 6px 0 0;background:#93c5fd;min-height:3px}
-.bar .b.over{background:#ef4444}.bar .c{font-size:11px;color:var(--mut)}
-.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;margin-bottom:10px;font-size:14px}
-.alert.red{background:#fef2f2;border:1px solid #fecaca}.alert.yel{background:#fffbeb;border:1px solid #fde68a}
+.bar .b{width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#818cf8,#6366f1);min-height:3px}
+.bar .b.over{background:linear-gradient(180deg,#f87171,#dc2626)}
+.bar .c{font-size:11px;color:var(--mut)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:13px 15px;border-radius:12px;margin-bottom:10px;font-size:14px}
+.alert.red{background:var(--bad-bg);border:1px solid #fecaca}
+.alert.yel{background:var(--warn-bg);border:1px solid #fde68a}
+.alert.grn{background:var(--ok-bg);border:1px solid #bbf7d0}
 .alert .ic{font-size:18px}
 .mut{color:var(--mut);font-size:13px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:800px){.grid2{grid-template-columns:1fr}}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
-.jr{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:99}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mut);font-weight:600}
+.jr{font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 20px;border-radius:12px;opacity:0;transition:.3s;pointer-events:none;z-index:99;box-shadow:0 8px 24px rgba(15,23,42,.3)}
 #toast.on{opacity:1}
-.big{font-size:20px;font-weight:700}
-.phone{max-width:360px;margin:0 auto;border:10px solid #111827;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15)}
-.phone .ph-head{background:#111827;color:#fff;padding:14px 16px;font-weight:700}
+.big{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.phone{max-width:360px;margin:0 auto;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 12px 34px rgba(15,23,42,.12)}
+.phone .ph-head{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:16px 18px;font-weight:800}
 .phone .ph-body{padding:16px}
-.hint{background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:10px 14px;font-size:13px;color:#3730a3;margin-bottom:14px}
-@media print{header,nav,.btn,#toast,.noprint{display:none!important}body{background:#fff}.card{border:0}}
+.hint{background:var(--acc-soft);border:1px solid var(--acc-line);border-radius:12px;padding:11px 15px;font-size:13px;color:#3730a3;margin-bottom:14px}
+code{background:#f1f5f9;padding:2px 7px;border-radius:6px;font-size:.92em}
+.ring{width:150px;height:150px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.ring .in{width:110px;height:110px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring .in b{font-size:30px;letter-spacing:-.02em}
+.hero{text-align:center;padding:34px 16px 22px}
+.hero h1{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:0 0 8px}
+.hero p{color:var(--mut);font-size:15.5px;margin:0 auto 20px;max-width:460px}
+.foot{color:var(--mut);font-size:12.5px;text-align:center;margin:26px 0 6px}
+.foot b{color:var(--ink)}
+@media print{header,nav,.btn,#toast,.noprint,body::before{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+
+/* ---------- мобильная адаптация v2 ---------- */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
+.tw table{min-width:680px}
+.tw th,.tw td:first-child{white-space:nowrap}
+@media(max-width:800px){
+ nav{flex-wrap:nowrap;overflow-x:auto;padding:10px;gap:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ nav::-webkit-scrollbar{display:none}
+ nav button{flex:0 0 auto;white-space:nowrap;padding:9px 14px;font-size:14px}
+ main{margin:14px auto;padding:0 10px}
+ .card{padding:14px}
+ .kpi{min-width:calc(50% - 7px)}
+ .kpi .n{font-size:23px}
+ td input,input[type=text],input[type=tel],input[type=number],select{font-size:16px}
+ table{font-size:13px}
+ .tw td:first-child,.tw th:first-child{position:sticky;left:0;background:#fff;z-index:1;box-shadow:1px 0 0 var(--line)}
+ .phone{max-width:100%;border:0;border-radius:0;box-shadow:none}
+ header{padding:10px 12px}
+ .note{display:none}
+ .hero h1{font-size:24px}
+ .btn{padding:12px 18px}
+}
+
+/* ---------- QR-модалка ---------- */
+.qr-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.qr-box{background:#fff;border-radius:16px;padding:20px;max-width:330px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(15,23,42,.3)}
+.qr-box img{width:220px;height:220px;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#fff}
 </style></head><body>
-<header><b>⏰ Часовой лимит · 60/6</b> <span class="demo">рабочая панель · демо-данные</span>
-<span style="margin-left:auto;font-size:12px;color:#9ca3af">данные хранятся локально в этом браузере</span></header>
+<header><span class="logo">Норма<span class="dot">.</span></span> <span class="tag606">счётчик 60/6</span> <span class="demo">демо-данные</span>
+<span class="note">данные хранятся локально в этом браузере</span></header>
 <nav id="nav"></nav><main id="view"></main><div id="toast"></div>
 <script>
 'use strict';
@@ -60,12 +116,38 @@ function curMonth(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 function monthWindow(n){const CM=curMonth();const a=[];for(let i=n-1;i>=0;i--)a.push(addMonths(CM,-i));return a;}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2200);}
 const STATUS={
- safe:{t:'Безопасно',fg:'#15803d',bg:'#dcfce7'},
+ safe:{t:'Безопасно',fg:'#047857',bg:'#d1fae5'},
  warn:{t:'Внимание',fg:'#b45309',bg:'#fef3c7'},
  crit:{t:'На грани',fg:'#b91c1c',bg:'#fee2e2'},
  triggered:{t:'Лимит сработал',fg:'#991b1b',bg:'#fecaca'},
- paused:{t:'Пауза 60/6',fg:'#57534e',bg:'#e7e5e4'}};
+ paused:{t:'Пауза 60/6',fg:'#475569',bg:'#e2e8f0'}};
 function badge(st){const s=STATUS[st];return '<span class="badge" style="color:'+s.fg+';background:'+s.bg+'">'+s.t+'</span>';}
+function suspMark(ex){return ex.suspended?' <span class="badge" style="color:#991b1b;background:#fee2e2" title="Фактическая приостановка отмечена вручную">факт: пауза</span>':'';}
+
+/* ---------- приглашения ---------- */
+function inviteLink(ex){return location.origin+location.pathname+'#'+ex.code;}
+function inviteMsg(ex){return 'Приглашение в «Норма» — счётчик часов 60/6 для самозанятых.\n\nВаш заказчик добавил вас в панель. Откройте ссылку — она сразу покажет ваш счётчик:\n'+inviteLink(ex)+'\n\nИли на странице «Исполнитель» введите код: '+ex.code;}
+function copyText(t,ok){const done=()=>toast(ok||'Скопировано');
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(()=>fallback(t,done));}else fallback(t,done);}
+function fallback(t,done){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+function copyInvite(ex){copyText(inviteMsg(ex),'Приглашение скопировано — вставьте в переписку');jlog(ex.name+': текст приглашения скопирован');}
+function openWA(ex){window.open('https://wa.me/?text='+encodeURIComponent(inviteMsg(ex)),'_blank');jlog(ex.name+': приглашение отправлено через WhatsApp');}
+function openTG(ex){window.open('https://t.me/share/url?url='+encodeURIComponent(inviteLink(ex))+'&text='+encodeURIComponent('Приглашение в «Норма» · ваш код: '+ex.code),'_blank');jlog(ex.name+': приглашение отправлено через Telegram');}
+function openMAX(ex){window.open('https://max.ru/:share?text='+encodeURIComponent(inviteMsg(ex)),'_blank');jlog(ex.name+': приглашение отправлено через MAX');}
+
+/* ---------- QR-код ---------- */
+function closeQR(){const e=document.getElementById('qrOv');if(e)e.remove();}
+function showQR(ex){
+ const old=document.getElementById('qrOv');if(old)old.remove();
+ const ov=document.createElement('div');ov.id='qrOv';ov.className='qr-ov';
+ ov.onclick=function(e){if(e.target===ov)closeQR();};
+ ov.innerHTML='<div class="qr-box"><div class="big">QR-код приглашения</div>'
+ +'<div class="mut">'+ex.name+' · код '+ex.code+'</div>'
+ +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data='+encodeURIComponent(inviteLink(ex))+'" alt="QR-код">'
+ +'<div class="mut" style="margin-top:8px">Наведите камеру телефона — откроется персональный счётчик. Картинку можно сохранить: удерживайте палец и выберите «Сохранить».</div>'
+ +'<div class="row" style="justify-content:center;margin-top:14px"><button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать приглашение</button><button class="btn g" onclick="closeQR()">Закрыть</button></div></div>';
+ document.body.appendChild(ov);
+}
 
 /* ---------- состояние ---------- */
 const KEY='hr60_v1';
@@ -75,19 +157,19 @@ function save(){localStorage.setItem(KEY,JSON.stringify(S));}
 function uid(){return Math.random().toString(36).slice(2,8).toUpperCase();}
 function seed(){
  const CM=curMonth(),M=n=>addMonths(CM,n);
- const mk=(a,b,c,d,e,f,g)=>({[M(-7)]:a||'', [M(-6)]:b||'',[M(-5)]:c||'',[M(-4)]:d||'',[M(-3)]:e||'',[M(-2)]:f||'',[M(-1)]:g||''});
+ const mk=(a,b,c,d,e,f,g,h)=>({[M(-7)]:a||'',[M(-6)]:b||'',[M(-5)]:c||'',[M(-4)]:d||'',[M(-3)]:e||'',[M(-2)]:f||'',[M(-1)]:g||'',[M(0)]:h||''});
  S={version:1,settings:{...DEF},journal:[],executors:[
-  {id:uid(),code:'A7K2',name:'Иванов И. И.',phone:'+7 911 100-11-22',platform:'Яндекс Смена · СтройПодряд',payouts:mk(42000,45000,48000,46000,47000,44000,41000),hours:mk(48,66,68,70,65,64,61)},
-  {id:uid(),code:'M3P9',name:'Петрова А. С.',phone:'+7 911 100-33-44',platform:'Авито Подработки · СтройПодряд',payouts:mk(38000,39500,41000,40000,40500,39000,38500),hours:mk(30,55,63,65,64,66,62)},
-  {id:uid(),code:'K4T8',name:'Козлова М. В.',phone:'+7 911 100-55-66',platform:'КлинингПро · Клининг',payouts:mk(28000,31000,30000,12000,22000,26000,25000),hours:mk(52,64,66,61,40,62,60)},
-  {id:uid(),code:'D1R6',name:'Сидоров П. Н.',phone:'+7 911 100-77-88',platform:'Яндекс Смена · Склад №2',payouts:mk(21000,22000,23000,21000,24000,22000,23000),hours:mk(44,50,48,52,55,50,54)},
-  {id:uid(),code:'V8L2',name:'Кузнецов Д. А.',phone:'+7 911 100-99-00',platform:'Доставка Еда · Общепит',payouts:mk(18000,19000,25000,27000,26000,25500,26500),hours:mk(38,40,66,70,64,71,0)} ],
+  {id:uid(),code:'A7K2',name:'Иванов И. И.',phone:'+7 911 100-11-22',platform:'Яндекс Смена · СтройПодряд',suspended:false,payouts:mk(42000,45000,48000,46000,47000,44000,41000),hours:mk(48,66,68,70,65,64,61,'')},
+  {id:uid(),code:'M3P9',name:'Петрова А. С.',phone:'+7 911 100-33-44',platform:'Авито Подработки · СтройПодряд',suspended:false,payouts:mk(38000,39500,41000,40000,40500,39000,38500),hours:mk(30,55,55,65,64,66,62,63)},
+  {id:uid(),code:'K4T8',name:'Козлова М. В.',phone:'+7 911 100-55-66',platform:'КлинингПро · Клининг',suspended:false,payouts:mk(28000,31000,30000,12000,22000,26000,25000),hours:mk(52,64,66,40,62,63,64,65)},
+  {id:uid(),code:'D1R6',name:'Сидоров П. Н.',phone:'+7 911 100-77-88',platform:'Яндекс Смена · Склад №2',suspended:false,payouts:mk(21000,22000,23000,21000,24000,22000,23000),hours:mk(44,50,48,52,55,50,54,48)},
+  {id:uid(),code:'V8L2',name:'Кузнецов Д. А.',phone:'+7 911 100-99-00',platform:'Доставка Еда · Общепит',suspended:false,payouts:mk(18000,19000,25000,27000,26000,25500,26500),hours:mk(38,40,66,70,64,71,0,66)} ],
   journal:[{ts:new Date().toISOString(),txt:'Загружены демо-данные (5 исполнителей)'}]};
  save();}
 function load(){try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;}if(!S||!S.executors)seed();}
 function jlog(txt){S.journal.unshift({ts:new Date().toISOString(),txt});if(S.journal.length>200)S.journal.length=200;save();}
 
-/* ---------- расчётное ядро 60/6 ---------- */
+/* ---------- расчётное ядро 60/6 (проверено на граничных кейсах) ---------- */
 function calcLink(ex){
  const Sx=S.settings;
  const months=Object.keys(ex.hours||{}).sort();
@@ -110,17 +192,21 @@ function calcLink(ex){
   r.status='crit';r.forecast='при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,1));
  }else if(series>=Sx.seriesLen-2){
   r.status='warn';
-  r.forecast=hcur>Sx.limit?('при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,Sx.seriesLen-series)))
-   :('если снова >'+Sx.limit+' ч — сработает в '+label(addMonths(addMonths(cur,1),Sx.seriesLen-1)));
+  r.forecast='при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,Sx.seriesLen-series));
  }else{
   r.status='safe';
   r.forecast=hcur>Sx.limit?('при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,Sx.seriesLen-series))):'риска нет';
  }
  return r;}
-function payoutRisk(ex){ // упрощённый индикатор дохода (25 тыс. ₽ × 5 мес подряд)
+function payoutRisk(ex){
  const months=Object.keys(ex.payouts||{}).sort();let s=0,best=0;
  for(const m of months){const p=+ex.payouts[m]||0;if(p>=25000){s++;if(s>best)best=s;}else s=0;}
  return best;}
+function remainTxt(ex){ // «осталось до лимита» в текущем месяце
+ const CM=curMonth();if(ex.hours[CM]==null||ex.hours[CM]==='')return null;
+ const h=+ex.hours[CM]||0,left=S.settings.limit-h;
+ return left>=0?('Израсходовано '+h+' ч — до лимита осталось '+left+' ч.')
+  :('Лимит превышен на '+(-left)+' ч — счётчик серии идёт.');}
 const RANK={triggered:0,paused:1,crit:2,warn:3,safe:4};
 
 /* ---------- навигация ---------- */
@@ -128,7 +214,7 @@ const TABS=[['dash','Панель'],['execs','Исполнители'],['exec','
 let tab='dash',openId=null,execCode=null;
 function renderNav(){
  $('#nav').innerHTML=TABS.map(t=>'<button class="'+(tab===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>').join('');}
-function go(t,arg){tab=t;if(arg!==undefined)openId=arg;renderNav();render();}
+function go(t,arg){tab=t;openId=(arg!==undefined?arg:null);renderNav();render();}
 function render(){
  const v=$('#view');
  if(tab==='dash')v.innerHTML=viewDash();
@@ -150,15 +236,16 @@ function viewDash(){
   if(c.status==='crit')alerts+='<div class="alert red"><span class="ic">🚨</span><div><b>'+r.ex.name+'</b> — '+c.series+'-й месяц подряд выше лимита. При текущем темпе приостановка в '+label(addMonths(CM,1))+'. Рекомендация: снизить часы в '+label(CM).replace(' '+CM.slice(2),'')+' или распределить по другому заказчику.</div></div>';
   if(c.status==='warn')alerts+='<div class="alert yel"><span class="ic">⚠️</span><div><b>'+r.ex.name+'</b> — '+c.series+'-й месяц подряд. '+c.forecast+'. Пора готовить план на '+label(addMonths(CM,1))+'.</div></div>';
   if(c.status==='triggered')alerts+='<div class="alert red"><span class="ic">⛔</span><div><b>'+r.ex.name+'</b> — лимит сработал в '+label(CM)+'. Пауза 2 месяца, заказы через платформу приостановлены. Варианты: перераспределить объём, оформить ГПД напрямую, взять объём на себя.</div></div>';
+  if(r.ex.suspended&&c.status!=='triggered'&&c.status!=='paused')alerts+='<div class="alert yel"><span class="ic">⛔</span><div><b>'+r.ex.name+'</b> — отмечена фактическая приостановка платформой (вручную). Расчётный статус: '+STATUS[c.status].t+'.</div></div>';
  });
  const tbl='<table><tr><th>Исполнитель</th><th>Платформа · заказчик</th>'+monthWindow(8).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Серия</th><th>Статус</th><th>Прогноз</th></tr>'
  +rows.map(r=>{const ex=r.ex,c=r.c;const tds=monthWindow(8).map(m=>{const h=ex.hours[m];const v=(h===''||h==null)?'':(+h>S.settings.limit?'<b style="color:#b91c1c">'+h+'</b>':h);return '<td class="num">'+(v||'–')+'</td>';}).join('');
-  return '<tr style="cursor:pointer" onclick="go(\'execs\',\''+ex.id+'\')"><td><b>'+ex.name+'</b></td><td class="mut">'+ex.platform+'</td>'+tds+'<td class="num"><b>'+c.series+'/'+S.settings.seriesLen+'</b></td><td>'+badge(c.status)+'</td><td class="mut">'+(c.forecast||'—')+'</td></tr>';}).join('')+'</table>';
+  return '<tr style="cursor:pointer" onclick="go(\'execs\',\''+ex.id+'\')"><td><b>'+ex.name+'</b></td><td class="mut">'+ex.platform+'</td>'+tds+'<td class="num"><b>'+c.series+'/'+S.settings.seriesLen+'</b></td><td>'+badge(c.status)+suspMark(ex)+'</td><td class="mut">'+(c.forecast||'—')+'</td></tr>';}).join('')+'</table>';
  return '<div class="kpis">'
  +'<div class="kpi"><div class="n">'+S.executors.length+'</div><div class="l">исполнителей</div></div>'
  +'<div class="kpi"><div class="n" style="color:#b91c1c">'+(cnt.crit+cnt.triggered)+'</div><div class="l">на грани / сработал</div></div>'
  +'<div class="kpi"><div class="n" style="color:#b45309">'+cnt.warn+'</div><div class="l">на предупреждении</div></div>'
- +'<div class="kpi"><div class="n" style="color:#15803d">'+cnt.safe+'</div><div class="l">безопасно</div></div></div>'
+ +'<div class="kpi"><div class="n" style="color:#059669">'+cnt.safe+'</div><div class="l">безопасно</div></div></div>'
  +(alerts||'<div class="card mut">Открытых алертов нет — все счётчики под контролем.</div>')
  +'<div class="card"><div class="big" style="margin-bottom:8px">Реестр связок · '+label(CM)+'</div>'+tbl+'</div>';
 }
@@ -168,25 +255,39 @@ function viewExecs(){
  if(openId){const ex=S.executors.find(e=>e.id===openId);if(ex)return viewDetail(ex);openId=null;}
  const CM=curMonth();
  const rows=S.executors.map(ex=>({ex,c:calcLink(ex)})).sort((a,b)=>RANK[a.c.status]-RANK[b.c.status]);
- const tbl='<table><tr><th>Исполнитель</th><th>Код входа</th><th>Платформа · заказчик</th>'+monthWindow(6).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Статус</th></tr>'
- +rows.map(r=>{const tds=monthWindow(6).map(m=>'<td class="num"><input type="number" min="0" max="400" value="'+(r.ex.hours[m]??'')+'" onchange="setHours(\''+r.ex.id+'\',\''+m+'\',this.value)"></td>').join('');
-  return '<tr><td><b>'+r.ex.name+'</b><div class="mut">'+r.ex.phone+'</div></td><td><code>'+r.ex.code+'</code></td><td class="mut">'+r.ex.platform+'</td>'+tds+'<td>'+badge(r.c.status)+'</td></tr>';}).join('')+'</table>';
- return '<div class="hint">Часы можно вводить прямо в таблицу — счётчики и статусы пересчитываются мгновенно. Клик по исполнителю на «Панели» открывает карточку. Код входа исполнитель использует на странице «Исполнитель».</div>'
- +'<div class="card"><div class="big" style="margin-bottom:10px">Табель часов</div>'+tbl+'</div>'
+ const tbl='<table id="execTbl"><tr><th>Исполнитель</th><th>Код входа</th><th>Платформа · заказчик</th>'+monthWindow(6).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Статус</th></tr>'
+ +rows.map(r=>{const tds=monthWindow(6).map(m=>'<td class="num"><input type="number" min="0" max="400" id="h_'+r.ex.id+'_'+m+'" value="'+(r.ex.hours[m]??'')+'" onchange="setHours(\''+r.ex.id+'\',\''+m+'\',this.value)"></td>').join('');
+  return '<tr data-s="'+(r.ex.name+' '+r.ex.phone+' '+r.ex.platform).toLowerCase().replace(/"/g,'&quot;')+'"><td><b>'+r.ex.name+'</b><div class="mut">'+r.ex.phone+'</div></td><td><code>'+r.ex.code+'</code></td><td class="mut">'+r.ex.platform+'</td>'+tds+'<td>'+badge(r.c.status)+suspMark(r.ex)+'</td></tr>';}).join('')+'</table>';
+ return '<div class="hint">Часы можно вводить прямо в таблицу — счётчики и статусы пересчитываются мгновенно, фокус остаётся в ячейке. Клик по исполнителю на «Панели» открывает карточку.</div>'
+ +'<div class="card"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><div class="big">Табель часов</div>'
+ +'<input type="text" placeholder="Поиск: имя, телефон, платформа…" style="flex:1;min-width:180px" oninput="filterExecs(this.value)"></div>'+tbl+'</div>'
  +'<div class="card"><div class="big" style="margin-bottom:10px">Добавить исполнителя</div>'
  +'<div class="row"><label class="f">ФИО<input type="text" id="nName" placeholder="Иванов И. И."></label>'
  +'<label class="f">Телефон<input type="tel" id="nPhone" placeholder="+7 900 000-00-00"></label>'
  +'<label class="f">Платформа · заказчик<input type="text" id="nPlat" placeholder="Яндекс Смена · СтройПодряд"></label>'
  +'<button class="btn p" onclick="addExec()">Добавить</button></div></div>';
 }
+function filterExecs(v){v=v.trim().toLowerCase();
+ document.querySelectorAll('#execTbl tbody tr,#execTbl tr[data-s]').forEach(function(r){
+  if(!r.dataset||!r.dataset.s)return;r.style.display=(!v||r.dataset.s.indexOf(v)>=0)?'':'none';});}
 function setHours(id,m,v){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
  if(v===''||v==null){delete ex.hours[m];}else ex.hours[m]=+v;
- jlog(ex.name+': часы '+label(m)+' = '+(v||'0')+' (введено заказчиком)');save();render();}
+ jlog(ex.name+': часы '+label(m)+' = '+(v||'0')+' (введено заказчиком)');save();render();
+ const ni=document.getElementById('h_'+id+'_'+m);
+ if(ni){ni.focus();try{ni.setSelectionRange(ni.value.length,ni.value.length);}catch(e){}}}
 function addExec(){
  const n=$('#nName').value.trim(),p=$('#nPhone').value.trim(),pl=$('#nPlat').value.trim()||'без платформы';
  if(!n){toast('Укажите имя исполнителя');return;}
- S.executors.push({id:uid(),code:uid().slice(0,4),name:n,phone:p,platform:pl,payouts:{},hours:{}});
+ S.executors.push({id:uid(),code:uid().slice(0,4),name:n,phone:p,platform:pl,suspended:false,payouts:{},hours:{}});
  jlog('Добавлен исполнитель '+n);save();render();toast('Исполнитель добавлен');}
+function saveExecEdits(id){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ const n=$('#eName').value.trim();if(!n){toast('Имя не может быть пустым');return;}
+ ex.name=n;ex.phone=$('#ePhone').value.trim();ex.platform=$('#ePlat').value.trim()||'без платформы';
+ jlog('Исполнитель обновлён: '+ex.name);save();render();toast('Изменения сохранены');}
+function delExec(id){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ if(!confirm('Удалить '+ex.name+'? Все его часы, выплаты и журнал исчезнут. Действие необратимо — сначала сделайте резервную копию в «Настройках».'))return;
+ S.executors=S.executors.filter(e=>e.id!==id);
+ jlog('Исполнитель удалён: '+ex.name);save();go('execs');toast('Исполнитель удалён');}
 function viewDetail(ex){
  const c=calcLink(ex),CM=curMonth();
  const months=monthWindow(8);
@@ -194,76 +295,112 @@ function viewDetail(ex){
  const bars=months.map(m=>{const h=+ex.hours[m]||0;const over=h>S.settings.limit;
   return '<div><div class="c">'+(h||'–')+'</div><div class="b'+(over?' over':'')+'" style="height:'+Math.round(h/maxH*100)+'%"></div><div class="c">'+label(m)+'</div></div>';}).join('');
  const pr=payoutRisk(ex);
+ const rem=remainTxt(ex);
  const jr=S.journal.filter(j=>j.txt.indexOf(ex.name)>=0).slice(0,8).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU').slice(0,16)+' — '+j.txt+'</div>').join('')||'<div class="mut">записей нет</div>';
  const pay=months.map(m=>'<div style="text-align:center"><div class="mut" style="font-size:11px">'+label(m)+'</div><input type="number" min="0" step="500" style="width:70px" value="'+(ex.payouts[m]??'')+'" onchange="setPay(\''+ex.id+'\',\''+m+'\',this.value)"></div>').join('');
  return '<button class="btn g noprint" onclick="go(\'execs\')">← К списку</button> <button class="btn s noprint" onclick="window.print()">🖨 Досье в PDF (печать)</button><br><br>'
- +'<div class="card"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="big">'+ex.name+'</div>'+badge(c.status)
+ +'<div class="card"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="big">'+ex.name+'</div>'+badge(c.status)+suspMark(ex)
  +'<div class="mut">'+ex.platform+' · '+ex.phone+' · код <code>'+ex.code+'</code></div></div>'
  +'<div class="bar" style="margin-top:14px">'+bars+'</div>'
  +'<div><b>Серия: '+c.series+'/'+S.settings.seriesLen+'.</b> '+(c.forecast||'')+'</div>'
+ +(rem?'<div class="mut" style="margin-top:4px">'+label(CM)+': '+rem+'</div>':'')
  +(c.resetMonth?'<div class="mut">Серия сбрасывалась в '+label(c.resetMonth)+' (месяц ≤ '+S.settings.limit+' ч).</div>':'')
  +(c.pausedUntil?'<div class="mut">Пауза действует до конца '+label(c.pausedUntil)+'.</div>':'')
+ +(ex.suspended?'<div class="alert red" style="margin-top:10px"><span class="ic">⛔</span><div>Отмечена <b>фактическая приостановка платформой</b> (вручную). Расчётный статус панели при этом: '+STATUS[c.status].t+'.</div></div>':'')
+ +'<button class="btn '+(ex.suspended?'g':'s')+' noprint" style="margin-top:10px" onclick="toggleSusp(\''+ex.id+'\')">'+(ex.suspended?'Снять отметку «приостановлен»':'Отметить: платформа приостановила')+'</button>'
  +'</div>'
+ +'<div class="card noprint"><div class="big" style="margin-bottom:8px">Пригласить исполнителя</div>'
+ +'<div class="mut" style="margin-bottom:10px">Ссылка и код персональные. Исполнитель открывает её на телефоне и видит только свой счётчик — ваши таблицы он не видит.</div>'
+ +'<div class="row"><code style="font-size:16px">'+ex.code+'</code>'
+ +'<input type="text" readonly value="'+inviteLink(ex)+'" style="flex:1;min-width:180px;font-size:13px" onclick="this.select()">'
+ +'<button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать приглашение</button>'
+ +'<button class="btn g" onclick="openWA(S.executors.find(e=>e.id===\''+ex.id+'\'))">WhatsApp</button>'
+ +'<button class="btn g" onclick="openTG(S.executors.find(e=>e.id===\''+ex.id+'\'))">Telegram</button>'
+ +'<button class="btn g" onclick="openMAX(S.executors.find(e=>e.id===\''+ex.id+'\'))">MAX</button>'
+ +'<button class="btn p" onclick="showQR(S.executors.find(e=>e.id===\''+ex.id+'\'))">QR-код</button></div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:8px">Выплаты по месяцам, ₽</div><div class="row">'+pay+'</div>'
  +(pr>=4?'<div class="alert yel" style="margin-top:10px"><span class="ic">📊</span><div>Индикатор дохода (приказ 657н): '+pr+' месяцев подряд выплаты ≥ 25 000 ₽. При 5 месяцах подряд — риск признания трудовых отношений. Держите месяц ниже порога или готовьте документы ГПХ.</div></div>':'')
  +'</div>'
+ +'<div class="card noprint"><div class="big" style="margin-bottom:10px">Данные исполнителя</div>'
+ +'<div class="row"><label class="f">ФИО<input type="text" id="eName" value="'+ex.name.replace(/"/g,'&quot;')+'"></label>'
+ +'<label class="f">Телефон<input type="tel" id="ePhone" value="'+ex.phone.replace(/"/g,'&quot;')+'"></label>'
+ +'<label class="f">Платформа · заказчик<input type="text" id="ePlat" value="'+ex.platform.replace(/"/g,'&quot;')+'"></label>'
+ +'<button class="btn p" onclick="saveExecEdits(\''+ex.id+'\')">Сохранить изменения</button>'
+ +'<button class="btn d" onclick="delExec(\''+ex.id+'\')">Удалить исполнителя</button></div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:8px">Журнал действий (досье осмотрительности)</div>'+jr+'</div>';
 }
 function setPay(id,m,v){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
  if(v===''||v==null){delete ex.payouts[m];}else ex.payouts[m]=+v;jlog(ex.name+': выплата '+label(m)+' = '+(v||'0')+' ₽');save();render();}
+function toggleSusp(id){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ ex.suspended=!ex.suspended;
+ jlog(ex.name+': '+(ex.suspended?'отмечена фактическая приостановка платформой':'отметка приостановки снята'));
+ save();render();toast(ex.suspended?'Отметка «приостановлен» поставлена':'Отметка снята');}
 
 /* ---------- страница исполнителя ---------- */
 function viewExecPage(){
- if(!execCode)return '<div class="phone"><div class="ph-head">⏰ Часовой лимит</div><div class="ph-body">'
- +'<p>Введите код из приглашения вашего заказчика (или ссылку вида hr60.ru/i/<b>A7K2</b> — просто код).</p>'
+ if(!execCode)return '<div class="phone"><div class="ph-head">Норма · счётчик 60/6</div><div class="ph-body">'
+ +'<p>Введите код из приглашения вашего заказчика (или отсканируйте QR-код его приглашения).</p>'
  +'<div class="row"><input type="text" id="code" placeholder="Например, A7K2" style="flex:1;min-width:120px"><button class="btn p" onclick="enterCode()">Войти</button></div>'
  +'<p class="mut" style="margin-top:14px">Вход по номеру телефона не нужен: код выдаёт ваш заказчик. Данные видите только вы и он.</p></div></div>';
  const ex=S.executors.find(e=>e.code===execCode.toUpperCase());
  if(!ex){execCode=null;const v=viewExecPage();afterRender=()=>toast('Код не найден, попробуйте ещё раз');return v;}
  const c=calcLink(ex),CM=curMonth();
+ const next=label(addMonths(CM,1));
  const links=ex.platform.split('·').map(s=>s.trim());
  const hoursCur=ex.hours[CM];
+ const rem=remainTxt(ex);
  const advice={safe:'Всё под контролем. Если в этом месяце часов больше '+S.settings.limit+', следите за счётчиком.',
-  warn:'Вы на '+c.series+'-м месяце подряд выше лимита. В декабре можно снизить нагрузку — один месяц до '+S.settings.limit+' ч сбрасывает счётчик.',
-  crit:'Внимание: это '+c.series+'-й месяц подряд выше лимита. Если в декабре снова больше '+S.settings.limit+' ч — заказы от платформы приостановят на 2 месяца. Снизьте часы или предупредите заказчика.',
+  warn:'Вы на '+c.series+'-м месяце подряд выше лимита. В '+next+' можно снизить нагрузку — один месяц до '+S.settings.limit+' ч сбрасывает счётчик.',
+  crit:'Внимание: это '+c.series+'-й месяц подряд выше лимита. Если в '+next+' снова больше '+S.settings.limit+' ч — заказы от платформы приостановят на 2 месяца. Снизьте часы или предупредите заказчика.',
   triggered:'Лимит сработал. Заказы через платформу приостановлены на 2 месяца. Обсудите с заказчиком ГПД или другой формат работы.',
-  paused:'Идёт пауза после срабатывания лимита. '+c.forecast+'.'};
- return '<div class="phone"><div class="ph-head">⏰ Часовой лимит · '+ex.name.split(' ')[0]+'</div><div class="ph-body">'
+  paused:'Идёт пауза после срабатывания лимита. '+(c.forecast||'')};
+ return '<div class="phone"><div class="ph-head">Норма · '+ex.name.split(' ')[0]+'</div><div class="ph-body">'
  +'<button class="btn g" style="width:100%;margin-bottom:12px" onclick="exitCode()">Выйти</button>'
- +'<div style="text-align:center;margin:8px 0">'+badge(c.status)+'</div>'
+ +'<div style="text-align:center;margin:8px 0">'+badge(c.status)+(ex.suspended?'<div style="margin-top:6px">'+suspMark(ex)+'</div>':'')+'</div>'
  +'<div style="text-align:center" class="mut">'+ex.platform+'</div>'
  +'<div style="text-align:center;margin:14px 0"><span class="big" style="font-size:44px">'+(c.series)+'</span><span class="mut"> / '+S.settings.seriesLen+' месяцев</span></div>'
  +'<div class="hint" style="margin-bottom:14px">'+advice[c.status]+'</div>'
+ +(rem?'<div class="mut" style="text-align:center;margin-bottom:12px">'+rem+'</div>':'')
  +'<label class="f">Часы за '+label(CM)+' у «'+(links[1]||links[0])+'»'
  +'<input type="number" min="0" max="400" value="'+(hoursCur??'')+'" id="execHours" style="width:100%;font-size:18px;text-align:center" placeholder="0"></label>'
  +'<button class="btn p" style="width:100%;margin-top:10px" onclick="saveExecHours(\''+ex.id+'\')">Отправить</button>'
  +(hoursCur!=null?'<p class="mut" style="margin-top:10px">Отправлено: '+hoursCur+' ч. Можно исправить до конца месяца.</p>':'')
- +'<p class="mut" style="margin-top:16px">Напоминание придёт SMS или пуши в начале каждого месяца. Отписаться: СТОП.</p>'
+ +'<p class="mut" style="margin-top:16px">Автонапоминания пока в разработке — обновляйте часы в начале каждого месяца сами или по напоминанию заказчика.</p>'
  +'</div></div>';
 }
-function enterCode(){const v=$('#code').value.trim();if(!v)return;execCode=v.toUpperCase();render();}
-function exitCode(){execCode=null;render();}
+function enterCode(){const v=$('#code').value.trim();if(!v)return;execCode=v.toUpperCase();history.replaceState(null,'','#'+execCode);render();}
+function exitCode(){execCode=null;history.replaceState(null,'',location.pathname);render();}
 function saveExecHours(id){const ex=S.executors.find(e=>e.id===id);const v=+$('#execHours').value||0;
  ex.hours[curMonth()]=v;jlog(ex.name+': часы '+label(curMonth())+' = '+v+' (введено исполнителем)');save();render();toast('Сохранено');}
 
-/* ---------- калькулятор ---------- */
+/* ---------- калькулятор-витрина ---------- */
 function viewCalc(){
  const CM=curMonth(),ms=monthWindow(6);
  const inputs=ms.map(m=>'<label class="f">'+label(m)+'<input type="number" id="c_'+m+'" min="0" max="400" placeholder="часы" style="width:90px"></label>').join('');
- return '<div class="hint">Публичный лид-магнит: самозанятый вводит свои часы по месяцам и узнаёт, когда сработает лимит. Внизу — перехват для заказчиков.</div>'
- +'<div class="card"><div class="big" style="margin-bottom:10px">Когда у меня сработает лимит 60/6?</div>'
- +'<div class="row">'+inputs+'</div>'
- +'<button class="btn p" style="margin-top:14px" onclick="calcPub()">Рассчитать</button>'
- +'<div id="calcRes" style="margin-top:14px"></div></div>';
+ return '<div class="card hero">'
+ +'<h1>Сколько осталось до лимита 60/6?</h1>'
+ +'<p>Платформа приостановит заказы, если 6 месяцев подряд вы работали больше 60 часов в месяц. Введите свои часы — калькулятор покажет, когда это случится.</p>'
+ +'<div class="row" style="justify-content:center">'+inputs+'</div>'
+ +'<button class="btn p" style="margin-top:16px" onclick="calcPub()">Рассчитать</button>'
+ +'<div id="calcRes" style="margin-top:18px"></div></div>'
+ +'<div class="foot"><b>Норма</b> — счётчик часов 60/6 для самозанятых и их заказчиков. Данные не покидают ваш браузер.</div>';
 }
 function calcPub(){
  const ms=monthWindow(6),ex={hours:{}};
  ms.forEach(m=>{const v=$('#c_'+m).value;if(v!=='')ex.hours[m]=+v;});
  if(!Object.keys(ex.hours).length){toast('Введите часы хотя бы за один месяц');return;}
  const c=calcLink(ex);
- const a={safe:['✅','Лимит не угрожает.'],warn:['⚠️','Вы на '+c.series+'-м месяце подряд выше лимита. '],crit:['🚨','Срочно: '+c.series+'-й месяц подряд выше лимита. '],triggered:['⛔','Лимит сработал — платформа приостановит заказы на 2 месяца. '],paused:['⏸','Идёт пауза после срабатывания. ']};
- let cls={safe:'yel',warn:'yel',crit:'red',triggered:'red',paused:'yel'}[c.status];
- let out='<div class="alert '+cls+'"><span class="ic">'+a[c.status][0]+'</span><div><b>'+a[c.status][1]+'</b> '+(c.forecast?c.forecast.charAt(0).toUpperCase()+c.forecast.slice(1)+'.':'')+'<br>Один месяц с ≤ '+S.settings.limit+' часами сбрасывает счётчик на ноль.<br><br><b>Вы заказчик?</b> Нужна панель по всем исполнителям сразу — напишите нам, подключим пилот бесплатно.</div></div>';
+ const heads={safe:['✅','Лимит не угрожает'],warn:['⚠️','Счётчик уже идёт'],crit:['🚨','До приостановки один шаг'],triggered:['⛔','Лимит сработал'],paused:['⏸','Идёт пауза']};
+ const H=heads[c.status];
+ const pct=Math.min(100,Math.round(c.series/S.settings.seriesLen*100));
+ let ring='';
+ if(c.series>0&&!c.pausedUntil){
+  ring='<div class="ring" style="background:conic-gradient(var(--acc) '+pct+'%, var(--line) 0)"><div class="in"><b>'+c.series+'</b><span class="mut">из '+S.settings.seriesLen+' мес. подряд</span></div></div>';
+ }
+ let cls={safe:'grn',warn:'yel',crit:'red',triggered:'red',paused:'yel'}[c.status];
+ let out=ring+'<div class="alert '+cls+'" style="margin-top:'+(ring?'16px':'0')+'"><span class="ic">'+H[0]+'</span><div><b>'+H[1]+'.</b> '
+ +(c.forecast?c.forecast.charAt(0).toUpperCase()+c.forecast.slice(1)+'.<br>':'')
+ +'Один месяц с ≤ '+S.settings.limit+' часами сбрасывает счётчик на ноль.<br><br><b>Вы заказчик?</b> Нужна панель по всем исполнителям сразу — напишите нам, подключим пилот бесплатно.</div></div>';
  $('#calcRes').innerHTML=out;jlog('Калькулятор: расчёт для '+c.series+'/'+S.settings.seriesLen+' ('+c.status+')');}
 
 /* ---------- настройки ---------- */
@@ -274,9 +411,14 @@ function viewSet(){
  +'<label class="f">Длина серии, мес<input type="number" id="sLen" value="'+S.settings.seriesLen+'" style="width:90px"></label>'
  +'<label class="f">Пауза после срабатывания, мес<input type="number" id="sPause" value="'+S.settings.pauseMonths+'" style="width:90px"></label>'
  +'<button class="btn p" onclick="saveSet()">Сохранить</button></div></div>'
- +'<div class="card"><div class="big" style="margin-bottom:10px">Данные</div>'
- +'<button class="btn s" onclick="exportCSV()">⬇ Экспорт CSV (для 1С / Excel)</button> '
- +'<button class="btn g" onclick="if(confirm(\'Сбросить всё к демо-данным?\')){seed();render();toast(\'Демо-данные восстановлены\')}">Сбросить к демо</button></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Данные и резервная копия</div>'
+ +'<div class="row">'
+ +'<button class="btn s" onclick="exportCSV()">⬇ Экспорт CSV (для 1С / Excel)</button>'
+ +'<button class="btn s" onclick="exportJSON()">⬇ Резервная копия (JSON)</button>'
+ +'<button class="btn g" onclick="document.getElementById(\'impFile\').click()">⬆ Восстановить из копии</button>'
+ +'<input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)">'
+ +'<button class="btn d" onclick="if(confirm(\'Сбросить всё к демо-данным?\')){seed();render();toast(\'Демо-данные восстановлены\')}">Сбросить к демо</button></div>'
+ +'<div class="mut" style="margin-top:10px">Копия сохраняет всё: исполнителей, часы, выплаты, настройки и журнал. Данные живут в одном браузере — при смене устройства восстановите их из копии.</div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:10px">Журнал</div>'
  +S.journal.slice(0,15).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU')+' — '+j.txt+'</div>').join('')+'</div>';
 }
@@ -286,9 +428,36 @@ function exportCSV(){
  const rows=S.executors.map(ex=>{const c=calcLink(ex);
   return [ex.name,ex.phone,ex.platform,ex.code].concat(monthWindow(8).map(m=>ex.hours[m]??''),[c.series+'/'+S.settings.seriesLen,STATUS[c.status].t,c.forecast||'']);});
  const csv='\ufeff'+[head,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hr60_'+curMonth()+'.csv';a.click();
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='norma_'+curMonth()+'.csv';a.click();
  jlog('Экспорт CSV реестра');}
+function exportJSON(){
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+ a.download='norma_backup_'+curMonth()+'.json';a.click();jlog('Сохранена резервная копия');toast('Копия скачана');}
+function importJSON(inp){const f=inp.files&&inp.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=function(){let d=null;try{d=JSON.parse(r.result);}catch(e){}
+  if(!d||!d.executors||!Array.isArray(d.executors)){toast('Файл не похож на копию «Нормы»');inp.value='';return;}
+  if(!confirm('Восстановить копию от '+new Date(d.journal&&d.journal[0]?d.journal[0].ts:Date.now()).toLocaleDateString('ru-RU')+'? Текущие данные будут заменены ('+S.executors.length+' → '+d.executors.length+' исп.).')){inp.value='';return;}
+  S=d;jlog('Восстановлено из резервной копии ('+S.executors.length+' исполнителей)');save();render();toast('Данные восстановлены');inp.value='';};
+ r.readAsText(f);}
 
 /* ---------- старт ---------- */
-load();renderNav();render();
-</script></body></html>
+load();
+(function(){const h=(location.hash||'').replace('#','').trim().toUpperCase();
+ if(h&&S.executors.some(e=>e.code===h)){execCode=h;tab='exec';}})();
+renderNav();render();
+</script><script>
+/* ---------- обёртка таблиц для горизонтальной прокрутки ---------- */
+(function(){
+ function wrap(){
+  document.querySelectorAll('#view table').forEach(function(t){
+   if(t.parentElement && t.parentElement.classList.contains('tw'))return;
+   var d=document.createElement('div');d.className='tw';
+   t.parentNode.insertBefore(d,t);d.appendChild(t);
+  });
+ }
+ var v=document.getElementById('view');
+ if(v){new MutationObserver(wrap).observe(v,{childList:true,subtree:true});wrap();}
+})();
+</script>
+</body></html>
