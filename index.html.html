@@ -1,451 +1,294 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Дорожная карта 60/6 — штурманский пульт</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Часовой лимит 60/6 — рабочая панель</title>
 <style>
-*{box-sizing:border-box}body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#222}
-header{background:#1e3a5f;color:#fff;padding:14px 20px}
-header h1{font-size:20px;margin:0 0 4px}
-.meta{font-size:13px;opacity:.9;margin-top:3px}
-.progress{background:#ffffff33;height:6px;border-radius:3px;margin-top:8px;overflow:hidden}
-.progress i{display:block;height:100%;background:#4fc08d}
-.savebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:#eef2f7;border-bottom:1px solid #dde3e9;font-size:13px}
-.savebar button{padding:5px 10px;border:1px solid #9db4cc;background:#fff;color:#1e3a5f;border-radius:8px;cursor:pointer;font-size:12px}
-.savebar .st{color:#1e3a5f;opacity:.8}
-nav{display:flex;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:2;flex-wrap:wrap}
-nav button{padding:8px 14px;border:1px solid #ccc;background:#fff;border-radius:8px;cursor:pointer;font-size:14px}
-nav button.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-main{max-width:860px;margin:0 auto;padding:14px 16px 60px}
-h2{font-size:16px;margin:20px 0 8px}
-.card{background:#fff;border:1px solid #e2e6ea;border-radius:10px;padding:12px 14px;margin-bottom:10px}
-.card.over{border-left:4px solid #e74c3c}
-.card.done{opacity:.55}
-.row{display:flex;align-items:flex-start;gap:10px}
-.row input[type=checkbox]{width:18px;height:18px;margin-top:2px;cursor:pointer}
-.row .tt{flex:1}
-.tag{font-size:11px;background:#eef2f7;color:#445;border-radius:6px;padding:2px 8px;white-space:nowrap;margin-left:8px}
-.tag.due{background:#fdeeee;color:#c0392b}
-.crit{font-size:13px;color:#555;margin:6px 0 4px}
-.crit b{color:#333}
-textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:6px 8px;font-size:13px;min-height:38px;resize:vertical;font-family:inherit;margin-top:4px}
-.desc{font-size:13px;color:#777;margin-top:2px;white-space:pre-wrap}
-#log{min-height:280px;font-size:14px}
-.btn{margin-top:8px;padding:7px 14px;border:1px solid #ccc;background:#fff;border-radius:8px;cursor:pointer;font-size:13px}
-.btn.pp{margin-top:6px;padding:5px 10px;font-size:12px;color:#1e3a5f;border-color:#9db4cc}
-.hint{font-size:13px;color:#888;margin:10px 0}
-.crmwrap{overflow-x:auto;background:#fff;border:1px solid #e2e6ea;border-radius:10px;margin-top:8px}
-.crm{border-collapse:collapse;font-size:12px;width:100%}
-.crm th{background:#eef2f7;padding:5px 6px;border:1px solid #e2e6ea;white-space:nowrap;font-weight:600;text-align:left}
-.crm td{border:1px solid #e2e6ea;padding:1px}
-.crm td input,.crm td select{width:100%;min-width:90px;border:1px solid transparent;background:transparent;font-size:12px;padding:4px;font-family:inherit}
-.crm td input:focus,.crm td select:focus{border-color:#9db4cc;background:#fff;outline:none}
-.crm td input[data-cf=notes],.crm td input[data-af=notes],.crm td input[data-sf=notes]{min-width:180px}
-.crm td input[data-af=a2]{min-width:150px}
-.crm td input[data-sf=link],.crm td input[data-sf=login]{min-width:160px}
-.crm .empty{padding:10px;color:#888;text-align:center}
-.del{border:none;background:none;color:#c0392b;cursor:pointer;font-size:13px;padding:4px 6px}
-.docname{font-size:15px;font-weight:bold}
-.docdesc{font-size:13px;color:#666;margin:4px 0 8px}
-.docbtn{display:inline-block;margin-right:8px;padding:6px 12px;border:1px solid #1e3a5f;background:#1e3a5f;color:#fff;border-radius:8px;cursor:pointer;font-size:13px}
-.docbtn.alt{background:#fff;color:#1e3a5f}
-#ov{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;z-index:10;overflow:auto;padding:24px 10px}
-#ov .box{max-width:780px;margin:0 auto;background:#fff;border-radius:12px;padding:18px 22px}
-#ov pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.5;margin:10px 0}
-#ov .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-#ov h3{margin:0;font-size:17px}
-</style>
-</head>
-<body>
-<header>
-<h1>🚀 Дорожная карта «Часовой лимит 60/6»</h1>
-<div class="meta" id="meta">Сегодня: воскресенье, 15 ноя — лимит на сегодня: до 4 часов (выходной)</div>
-<div class="progress"><i id="pbar" style="width: 8%;"></i></div>
-<div class="meta" id="pcount">Сделано: 2 из 25</div>
-</header>
-<div class="savebar">
-<button id="btnAuto">🔗 Автосохранение: файл подключён</button>
-<button id="btnBackup">💾 Сохранить резерв</button>
-<button id="btnRestore">📂 Восстановить резерв</button>
-<input type="file" id="fileRestore" accept=".json" style="display:none">
-<span class="st" id="svs">✓ записано в файл, 13:02:44</span>
-</div>
-<nav>
-<button data-tab="today" class="">📌 Сегодня</button>
-<button data-tab="week">📅 Неделя</button>
-<button data-tab="all">🗂 Все этапы</button>
-<button data-tab="crm" class="on">📋 Контакты</button>
-<button data-tab="docs">📚 Материалы</button>
-<button data-tab="log" class="">📓 Журнал</button>
-</nav>
-<main id="main"><h2>🌐 Сообщества</h2><div class="hint">Реестр площадок: где вступили, где опубликовали опрос, где ждёт одобрения админа. В «Заметках» держите параметры входа: через кого вступили, когда одобрили, что разрешил админ.</div><button class="btn" id="addS">＋ Добавить сообщество</button> <button class="btn" id="csvS">⬇ Экспорт CSV</button><div class="crmwrap"><table class="crm"><tbody><tr><th>Название</th><th>Тип</th><th>Ссылка</th><th>Аудитория</th><th>Правила по рекламе</th><th>Статус</th><th>Дата публикации</th><th>Заметки / параметры входа</th><th></th></tr><tr><td><input data-sf="name" data-si="0" value="@kubKlekr_bot"></td><td><select data-sf="type" data-si="0"><option>Telegram-чат</option><option selected="">Telegram-канал</option><option>ВКонтакте</option><option>TenChat</option><option>MAX</option><option>Прочее</option></select></td><td><input data-sf="link" data-si="0" value="https://t.me/c/1607843918/51200"></td><td><input data-sf="aud" data-si="0" value="Бухгалтера"></td><td><input data-sf="rules" data-si="0" value=" вариант публикации А"></td><td><select data-sf="status" data-si="0"><option selected="">вступил</option><option>опрос опубликован</option><option>ожидает админа</option><option>отклонили</option><option>не подошло</option></select></td><td><input data-sf="date" data-si="0" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-sf="notes" data-si="0" value="https://kubklerk.ru/questions/20725-5-voprosami-1-skolko-u-vas-samozanyatyh"></td><td><button class="del" data-sx="0" title="Удалить">✕</button></td></tr><tr><td><input data-sf="name" data-si="1" value="@buhruchat"></td><td><select data-sf="type" data-si="1"><option>Telegram-чат</option><option>Telegram-канал</option><option>ВКонтакте</option><option>TenChat</option><option>MAX</option><option>Прочее</option></select></td><td><input data-sf="link" data-si="1" value="https://web.telegram.org/k/#@buhruchat"></td><td><input data-sf="aud" data-si="1" value="Бухгалтера"></td><td><input data-sf="rules" data-si="1" value=" вариант публикации А"></td><td><select data-sf="status" data-si="1"><option selected="">вступил</option><option>опрос опубликован</option><option>ожидает админа</option><option>отклонили</option><option>не подошло</option></select></td><td><input data-sf="date" data-si="1" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-sf="notes" data-si="1" value=""></td><td><button class="del" data-sx="1" title="Удалить">✕</button></td></tr><tr><td><input data-sf="name" data-si="2" value="@BiznesKontakti"></td><td><select data-sf="type" data-si="2"><option>Telegram-чат</option><option>Telegram-канал</option><option>ВКонтакте</option><option>TenChat</option><option>MAX</option><option>Прочее</option></select></td><td><input data-sf="link" data-si="2" value="https://web.telegram.org/k/#@BiznesKontakti"></td><td><input data-sf="aud" data-si="2" value="Предприниматели"></td><td><input data-sf="rules" data-si="2" value=" вариант публикации А"></td><td><select data-sf="status" data-si="2"><option selected="">вступил</option><option>опрос опубликован</option><option>ожидает админа</option><option>отклонили</option><option>не подошло</option></select></td><td><input data-sf="date" data-si="2" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-sf="notes" data-si="2" value=""></td><td><button class="del" data-sx="2" title="Удалить">✕</button></td></tr><tr><td><input data-sf="name" data-si="3" value="@selfworkchat"></td><td><select data-sf="type" data-si="3"><option>Telegram-чат</option><option>Telegram-канал</option><option>ВКонтакте</option><option>TenChat</option><option>MAX</option><option>Прочее</option></select></td><td><input data-sf="link" data-si="3" value="https://web.telegram.org/k/#@selfworkchat"></td><td><input data-sf="aud" data-si="3" value="Самозанятые и заказчики"></td><td><input data-sf="rules" data-si="3" value=" вариант публикации Б"></td><td><select data-sf="status" data-si="3"><option selected="">вступил</option><option>опрос опубликован</option><option>ожидает админа</option><option>отклонили</option><option>не подошло</option></select></td><td><input data-sf="date" data-si="3" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-sf="notes" data-si="3" value=""></td><td><button class="del" data-sx="3" title="Удалить">✕</button></td></tr></tbody></table></div><h2>👥 Контакты</h2><div class="hint">Планируйте касания: статус, дата, следующее действие. Сохраняется вместе с картой (и в файл, если подключено автосохранение).</div><button class="btn" id="addC">＋ Добавить контакт</button> <button class="btn" id="csvC">⬇ Экспорт CSV</button><div class="crmwrap"><table class="crm"><tbody><tr><th>Имя</th><th>Компания</th><th>Роль</th><th>Источник</th><th>Отрасль</th><th>Самозанятых</th><th>Статус</th><th>Дата касания</th><th>След. действие</th><th>Заметки</th><th></th></tr><tr><td colspan="11" class="empty">Пока пусто — добавьте первого контакта.</td></tr></tbody></table></div><h2>📝 Ответы на опрос</h2><div class="hint">Одна строка — один ответ. В5 «обратили бы внимание» — главный сигнал: дословные фразы вроде «сделайте — куплю» пишите сюда. К миддл-чеку 30.11 считаем по статусу «куплю».</div><button class="btn" id="addA">＋ Добавить ответ</button> <button class="btn" id="csvA">⬇ Экспорт CSV</button><div class="crmwrap"><table class="crm"><tbody><tr><th>Дата</th><th>Кто ответил</th><th>Где (чат/канал)</th><th>1. Сколько самозанятых</th><th>2. Как учитывается</th><th>3. Часы отслеживают?</th><th>4. Вопросы ФНС?</th><th>5. Обратили бы внимание</th><th>Статус</th><th>Заметки</th><th></th></tr><tr><td><input data-af="date" data-ai="0" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-af="who" data-ai="0" value="Татьяна"></td><td><input data-af="src" data-ai="0" value="@kubKlekr_bot"></td><td><input data-af="a1" data-ai="0" value="Ни одного нет,перешли на гпх"></td><td><input data-af="a2" data-ai="0" value=""></td><td><input data-af="a3" data-ai="0" value=""></td><td><input data-af="a4" data-ai="0" value=""></td><td><input data-af="a5" data-ai="0" value=""></td><td><select data-af="status" data-ai="0"><option>опрос получен</option><option>интерес</option><option>просил интервью</option><option>куплю</option><option>холодный</option></select></td><td><input data-af="notes" data-ai="0" value=""></td><td><button class="del" data-ax="0" title="Удалить">✕</button></td></tr><tr><td><input data-af="date" data-ai="1" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-af="who" data-ai="1" value="Марина | Аудит бизнеса"></td><td><input data-af="src" data-ai="1" value="@kubKlekr_bot"></td><td><input data-af="a1" data-ai="1" value=""></td><td><input data-af="a2" data-ai="1" value="у тех, кто считает сам, времени на учет обычно уже не хватает"></td><td><input data-af="a3" data-ai="1" value=""></td><td><input data-af="a4" data-ai="1" value=""></td><td><input data-af="a5" data-ai="1" value=""></td><td><select data-af="status" data-ai="1"><option>опрос получен</option><option>интерес</option><option>просил интервью</option><option>куплю</option><option>холодный</option></select></td><td><input data-af="notes" data-ai="1" value=""></td><td><button class="del" data-ax="1" title="Удалить">✕</button></td></tr><tr><td><input data-af="date" data-ai="2" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-af="who" data-ai="2" value="Андрей"></td><td><input data-af="src" data-ai="2" value="@kubKlekr_bot"></td><td><input data-af="a1" data-ai="2" value=""></td><td><input data-af="a2" data-ai="2" value=""></td><td><input data-af="a3" data-ai="2" value=""></td><td><input data-af="a4" data-ai="2" value=""></td><td><input data-af="a5" data-ai="2" value="дайте ссылку на сервис"></td><td><select data-af="status" data-ai="2"><option>опрос получен</option><option>интерес</option><option>просил интервью</option><option>куплю</option><option>холодный</option></select></td><td><input data-af="notes" data-ai="2" value=""></td><td><button class="del" data-ax="2" title="Удалить">✕</button></td></tr><tr><td><input data-af="date" data-ai="3" value="15.11.2026" placeholder="ГГГГ-ММ-ДД"></td><td><input data-af="who" data-ai="3" value="Инна"></td><td><input data-af="src" data-ai="3" value="@kubKlekr_bot"></td><td><input data-af="a1" data-ai="3" value="2-3"></td><td><input data-af="a2" data-ai="3" value=""></td><td><input data-af="a3" data-ai="3" value="Время не отслеживаем, работа на результат"></td><td><input data-af="a4" data-ai="3" value="Фнс присылает порой рассылку , что бы проанализировали не нарушаем ли"></td><td><input data-af="a5" data-ai="3" value=""></td><td><select data-af="status" data-ai="3"><option>опрос получен</option><option>интерес</option><option>просил интервью</option><option>куплю</option><option>холодный</option></select></td><td><input data-af="notes" data-ai="3" value=""></td><td><button class="del" data-ax="3" title="Удалить">✕</button></td></tr></tbody></table></div></main>
-<div id="ov"><div class="box"><div class="top"><h3 id="ovt"></h3><button class="docbtn alt" id="ovx">✕ Закрыть</button></div><pre id="ovp"></pre><button class="docbtn" id="ovd">⬇ Скачать файл</button></div></div>
-<script type="application/json" id="pdata">{"dates":{},"contacts":[],"answers":[{"date":"15.11.2026","a1":"Ни одного нет,перешли на гпх","who":"Татьяна","src":"@kubKlekr_bot"},{"date":"15.11.2026","who":"Марина | Аудит бизнеса","src":"@kubKlekr_bot","a1":"","a2":"у тех, кто считает сам, времени на учет обычно уже не хватает"},{"date":"15.11.2026","who":"Андрей","src":"@kubKlekr_bot","a1":"","a5":"дайте ссылку на сервис"},{"a1":"2-3","src":"@kubKlekr_bot","date":"15.11.2026","who":"Инна","a3":"Время не отслеживаем, работа на результат","a4":"Фнс присылает порой рассылку , что бы проанализировали не нарушаем ли"}],"d1":true,"r1":"","d2":true,"r2":"","d3":false,"r3":"","d4":false,"r4":"","d5":false,"r5":"","d6":false,"r6":"","d7":false,"r7":"","d8":false,"r8":"","d9":false,"r9":"","d10":false,"r10":"","d11":false,"r11":"","d12":false,"r12":"","d13":false,"r13":"","d14":false,"r14":"","d15":false,"r15":"","d16":false,"r16":"","d17":false,"r17":"","d18":false,"r18":"","d19":false,"r19":"","d20":false,"r20":"","d21":false,"r21":"","d22":false,"r22":"","d23":false,"r23":"","d24":false,"r24":"","d25":false,"r25":"","extra":[],"log":"[15.11.2026] Правовая база обновлена: критерий 60/6 — постановление Правительства № 760 от 01.10.2026, действует до 01.10.2032. Сегмент — прямые договоры (14 отраслей), платформы контролируют свои часы; наша ценность — сбор часов со всех связок в одном месте. Порог 60 и период 6 — параметры конфига.\n\n[15.11.2026] ИДЕЯ №2: «Штурманский пульт для всех». Суть: сервис с ИИ-разбивкой целей на этапы с учётом загруженности; соисполнители по ссылке на этап или цель; бытовые задачи; сдвиг дат — только владелец; ИИ разбирает этапы и хранит материалы.\nУзкие места: «для всех» = ни для кого (нужен клин: пары / дуэты по целям / мини-команды); ретеншн (планировщики бросают за 2–3 недели — продаём социальную связку, не тудушку); холодный старт ИИ (загруженность неизвестна); ИИ предлагает — человек редактирует; матрица прав (отметка, приёмка, приватность); конфликты редактирования; стоимость LLM; синхронизация и уведомления обязательны с первого дня; 152-ФЗ и на соисполнителей; конкуренция (Motion, WEEEK) — пробиваться клином.\nСтруктура: Ф0 разведка с 01.12 (опросы 3 клина, 6–8 интервью; выход ≥3 «куплю», смерть <2 из 8) → Ф1 консьерж дек–янв (3 дуэта, ручная поддержка; выход ≥50% этапов закрыто) → Ф2 MVP фев–мар (FastAPI+Postgres, ссылки-приглашения, Telegram-бот, 1 ИИ-сценарий) → Ф3 платный пилот апр (5–10 команд по 299 ₽/мес; выход ≥3 платящих) → Ф4 ревизия май.\nРЕШЕНИЕ: мораторий на Идею №2 до 30.11 (миддл-чек 60/6). Разрешена только разведка: 1 опрос в 2–3 чатах.\n\n[15.11.2026] Ответ на сомнение об отмене нормы: даже в худшем сценарии (отмена в 2028-м) успеваем цикл валидации и первых клиентов; на интервью добавлен вопрос-хедж «если критерий изменят — как будете учитывать часы?» (отличает покупателя учёта от покупателя страха).\n\n[15.11.2026] Опрос и каналы публикации объединены в один документ. В карту добавлена вкладка «Контакты»: таблица контактов (10 колонок) и таблица ответов на опросники, экспорт в CSV.\n\n[15.11.2026]\n📊 Исследуем важный вопрос для самозанятых\n\nПривет, коллеги!\n\nПроводим исследование по теме работы самозанятых. Важно для всех, кто работает по договору с заказчиками.\n\nСуть вопроса: с октября 2026 года действует новое правило — если вы работаете более 60 часов в месяц на одного заказчика 6 месяцев подряд, это может стать причиной для проверки.\n\nНам важно узнать:\n\nСколько у вас заказчиков сейчас?\nКак вы планируете свою загрузку?\nОтслеживаете ли количество рабочих часов?\nБыли ли ситуации с проверками от ФНС?\nЕсли появится инструмент, который заранее предупредит о риске — было бы полезно?\nЭто не реклама, а исследование рынка. Ответьте, пожалуйста, в комментариях или напишите в личку.\n\n⏰ Дедлайн: ответ нужен до конца недели\n","logInit":true,"communities":[{"status":"вступил","type":"Telegram-канал","name":"@kubKlekr_bot","link":"https://t.me/c/1607843918/51200","date":"15.11.2026","notes":"https://kubklerk.ru/questions/20725-5-voprosami-1-skolko-u-vas-samozanyatyh","aud":"Бухгалтера","rules":" вариант публикации А"},{"status":"вступил","name":"@buhruchat","link":"https://web.telegram.org/k/#@buhruchat","date":"15.11.2026","aud":"Бухгалтера","rules":" вариант публикации А"},{"status":"вступил","name":"@BiznesKontakti","link":"https://web.telegram.org/k/#@BiznesKontakti","aud":"Предприниматели","date":"15.11.2026","rules":" вариант публикации А"},{"status":"вступил","name":"@selfworkchat","link":"https://web.telegram.org/k/#@selfworkchat","aud":"Самозанятые и заказчики","date":"15.11.2026","rules":" вариант публикации Б"}]}</script>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#111827;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header b{font-size:17px}header .demo{background:#374151;border-radius:8px;padding:3px 10px;font-size:12px;color:#d1d5db}
+nav{display:flex;gap:4px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5}
+nav button{border:0;background:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--mut)}
+nav button.on{background:#eef2ff;color:var(--acc);font-weight:600}
+main{max-width:1100px;margin:20px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{flex:1;min-width:140px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .n{font-size:26px;font-weight:700}.kpi .l{font-size:12px;color:var(--mut)}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);text-align:left;padding:8px 6px;border-bottom:2px solid var(--line)}
+td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.num,th.num{text-align:center}
+td input{width:52px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;text-align:right;font:inherit}
+td input:focus{outline:2px solid #bfdbfe;border-color:var(--acc)}
+.btn{border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn.p{background:var(--acc);color:#fff}.btn.s{background:#eef2ff;color:var(--acc)}.btn.g{background:#f3f4f6;color:var(--ink)}
+.btn:hover{filter:brightness(.96)}
+input[type=text],input[type=tel],input[type=number],select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.bar{display:flex;align-items:flex-end;gap:6px;height:120px;margin:10px 0}
+.bar>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.bar .b{width:100%;border-radius:6px 6px 0 0;background:#93c5fd;min-height:3px}
+.bar .b.over{background:#ef4444}.bar .c{font-size:11px;color:var(--mut)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;margin-bottom:10px;font-size:14px}
+.alert.red{background:#fef2f2;border:1px solid #fecaca}.alert.yel{background:#fffbeb;border:1px solid #fde68a}
+.alert .ic{font-size:18px}
+.mut{color:var(--mut);font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
+.jr{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:99}
+#toast.on{opacity:1}
+.big{font-size:20px;font-weight:700}
+.phone{max-width:360px;margin:0 auto;border:10px solid #111827;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.phone .ph-head{background:#111827;color:#fff;padding:14px 16px;font-weight:700}
+.phone .ph-body{padding:16px}
+.hint{background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:10px 14px;font-size:13px;color:#3730a3;margin-bottom:14px}
+@media print{header,nav,.btn,#toast,.noprint{display:none!important}body{background:#fff}.card{border:0}}
+</style></head><body>
+<header><b>⏰ Часовой лимит · 60/6</b> <span class="demo">рабочая панель · демо-данные</span>
+<span style="margin-left:auto;font-size:12px;color:#9ca3af">данные хранятся локально в этом браузере</span></header>
+<nav id="nav"></nav><main id="view"></main><div id="toast"></div>
 <script>
-/* ===== ДАННЫЕ ЗАДАЧ ===== */
-var TASKS=[
-{id:1,ph:"v",date:"2026-11-14",title:"Разобраться в теме за 2 часа",desc:"Перечитать материалы проекта (вкладка «Материалы»), открыть панель и калькулятор, объяснить продукт вслух за 2 минуты без подсказки.",crit:"Панель открыта, объяснение вслух получилось"},
-{id:2,ph:"v",date:"2026-11-15",title:"Опубликовать опрос в 2–3 сообществах",desc:"Куда публиковать — в «Материалы» → «Опрос и каналы публикации». Найденные сообщества и ссылки на публикации заносите во вкладку «📋 Контакты» → таблицу «Сообщества».",crit:"2–3 публикации сделаны, ссылки в журнале"},
-{id:3,ph:"v",date:"2026-11-16",title:"Составить список первых 10 контактов",desc:"Заполняется во вкладке «📋 Контакты». Личные связи + активные чаты.",crit:"10 строк в таблице контактов"},
-{id:4,ph:"v",date:"2026-11-18",title:"Довести список до 20 контактов",desc:"HH.ru и Авито Работа: вакансии «уборщик/кладовщик/курьер по договору с самозанятым» — оттуда брать компанию и ЛПРа.",crit:"20 строк в таблице"},
-{id:5,ph:"v",date:"2026-11-20",title:"Разослать опрос по контактам",desc:"Тёплым — вариант Г (личное сообщение), остальным — А/Б/В по типу чата. Ответы заносить в таблицу «Ответы на опрос».",crit:"15 сообщений отправлено"},
-{id:6,ph:"v",date:"2026-11-21",title:"Первые 2 интервью по скрипту",desc:"Скрипт из «Пилотного пакета»: сначала «как решаете сейчас», потом показ продукта. Конспект в журнал.",crit:"2 интервью проведены"},
-{id:7,ph:"v",date:"2026-11-24",title:"Интервью до 5",desc:"Ритм касаний: день 0 — опрос, день 2 — пинг, день 7 — последний пинг.",crit:"5 конспектов в журнале"},
-{id:8,ph:"v",date:"2026-11-25",title:"Собрать карту конкурентов и обходов",desc:"Свести ответы на «как решаете проблему сейчас»: кто конкуренты, кто решает вручную.",crit:"Карта конкурентов в журнале"},
-{id:9,ph:"v",date:"2026-11-27",title:"Интервью до 8–10",desc:"Добрать недостающее, спросить про процесс закупки таких сервисов.",crit:"8–10 конспектов"},
-{id:10,ph:"v",date:"2026-11-30",title:"Миддл-чек: есть ли 3 «сделайте — куплю»",desc:"Если ≥3 — к пилоту. Если нет — разобрать, где сломался оффер, до траты времени на код. Считать по колонке «Статус: куплю» в таблице ответов.",crit:"Решение зафиксировано в журнале"},
-{id:11,ph:"p",date:"2026-12-01",title:"Отобрать 3 пилота",desc:"Критерии: 10–50 самозанятых, отрасль (клининг/склад/стройподряд/общепит), один владелец вопроса, лучше — уже ловили вопросы ФНС.",crit:"3 согласия, условия проговорены письменно"},
-{id:12,ph:"p",date:"2026-12-03",title:"Подготовить панель пилота",desc:"Скачайте «Панель 60/6» из «Материалов» под каждого пилота, внесите реестр его исполнителей.",crit:"У каждого пилота своя рабочая таблица"},
-{id:13,ph:"p",date:"2026-12-05",title:"Пригласить исполнителей",desc:"Раздать ссылки на страницу исполнителя, объяснить на пальцах, зачем это им.",crit:"≥70% приглашённых подключились"},
-{id:14,ph:"p",date:"2026-12-08",title:"Собрать первые данные часов",desc:"Пинг молчащих; исполнителю — выгода «история твоих часов сохранена».",crit:"≥60% отправили данные"},
-{id:15,ph:"p",date:"2026-12-12",title:"Первый еженедельный светофор",desc:"Собрать статусы из панели, отправить письмом заказчику (шаблон Z1).",crit:"3 письма отправлены"},
-{id:16,ph:"p",date:"2026-12-15",title:"Интервью обратной связи №1",desc:"Что удобно, что мешает, чего не хватает.",crit:"Конспект в журнале"},
-{id:17,ph:"p",date:"2026-12-22",title:"Полтора месяца пилота — сверка",desc:"Сверить метрики: подключения, данные, открытия панели.",crit:"Отчёт по метрикам в журнале"},
-{id:18,ph:"p",date:"2026-12-29",title:"Итоги пилота",desc:"Спросить каждого: «возьмёте с января за 4900?» — главный сигнал монетизации.",crit:"≥2 из 5 попросили счёт"},
-{id:19,ph:"m",date:"2027-01-08",title:"Выставить счёт пилотам",desc:"Тариф 4900 ₽/мес за панель. Решение за 2 недели проговорено в условиях пилота.",crit:"2 счёта выставлены"},
-{id:20,ph:"m",date:"2027-01-12",title:"Получить первый платёж",desc:"Если медлят — напомнить: окно спроса близко, весной дороже.",crit:"1 платёж получен"},
-{id:21,ph:"m",date:"2027-01-20",title:"Решение о развитии",desc:"Solo / фрилансер (150–400 тыс. ₽) / кофаундер-технарь. Посчитать MRR и свободное время.",crit:"Решение записано в журнале"},
-{id:22,ph:"w",date:"2027-02-10",title:"Оформить кейс пилота",desc:"Обезличенный кейс: была боль → инструмент → результат. Кейсы продают весной.",crit:"1 кейс оформлен"},
-{id:23,ph:"w",date:"2027-03-01",title:"Наработать воронку к пику спроса",desc:"Контрольные сроки отчётов — март/апрель, интерес к 60/6 растёт.",crit:"20 свежих контактов"},
-{id:24,ph:"w",date:"2027-04-01",title:"Волна вопросов ФНС — outreach",desc:"Активное касание базы: «сейчас самое время настроить учёт».",crit:"10 касаний в неделю"},
-{id:25,ph:"w",date:"2027-05-01",title:"Ревизия года",desc:"Что сработало, что нет. Масштабировать или продать наработку.",crit:"Решение о стратегии записано"}
-];
-var PH={v:"1. Валидация (ноябрь)",p:"2. Пилот руками (декабрь)",m:"3. Монетизация (январь)",w:"4. Окно спроса (весна 2027)"};
-var CST=["новый","опрос отправлен","интервью","пилот-кандидат","отказ","холодный"];
-var AST=["опрос получен","интерес","просил интервью","куплю","холодный"];
-var SCST=["вступил","опрос опубликован","ожидает админа","отклонили","не подошло"];
-var SCTY=["Telegram-чат","Telegram-канал","ВКонтакте","TenChat","MAX","Прочее"];
-/* ===== БИБЛИОТЕКА МАТЕРИАЛОВ ===== */
-var DOCS=[
-{file:"Спецификация_MVP_60_6.md",name:"Спецификация MVP",desc:"Архитектура, модель данных, ядро 60/6, DoD, план на 2 недели",type:"text",body:"СПЕЦИФИКАЦИЯ MVP «Часовой лимит 60/6»\n\n1. СУТЬ\nСервис-радар для заказчиков, привлекающих самозанятых: считает месячные часы по каждому исполнителю, ловит рискованный паттерн «60+ часов 6 месяцев подряд» (постановление Правительства № 760 от 01.10.2026, действует до 01.10.2032) ДО срабатывания и документирует осмотрительность.\n\n2. ПОВЕРХНОСТИ\n— Веб-кабинет заказчика: KPI, алерты, реестр со светофором, карточка исполнителя, журнал действий, досье в PDF, CSV-экспорт.\n— Страница исполнителя (PWA, без регистрации): вход по номеру телефона + SMS-код, ссылка вида hr60.ru/i/A7K2 или QR; один вопрос «сколько часов за месяц», ответ за 60 секунд.\n— Мессенджеры — опциональные коннекторы (MAX, Telegram, VK) поверх единого шлюза.\n— SMS — обязательный страховой канал: напоминание + ответ «КОД 62» без интернета.\n\n3. МОДЕЛЬ ДАННЫХ (9 сущностей)\nuser (телефон, роль), customer (юрлицо, ИНН), executor (телефон, имя опционально), link (исполнитель + заказчик, код входа, статус), month_record (link_id, месяц, часы, источник), alert (тип, дата, статус), action_log (журнал осмотрительности), plan/tariff (4900/9900/14900 ₽).\nПринцип: источник каждой записи часов сохраняется (исполнитель_веб / SMS / мессенджер / заказчик_вручную).\n\n4. ЯДРО 60/6\n— Серия = число последних подряд месяцев с часами ≥ 60.\n— Серия ≥ 6 → «Сработал», рекомендация: приостановить до {дата + 1 мес}.\n— Серия = 5 → «На грани», алерт заказчику и исполнителю.\n— Серия 3–4 → предупреждение.\n— Один месяц < 60 сбрасывает серию.\n— Прогноз: при сохранении медианы часов — дата срабатывания.\n\n5. ПАРАМЕТРЫ КАК КОНФИГ\nПорог 60 и период 6 месяцев — константы конфигурации, не код. Если норму изменят (порог, период, перечень отраслей) — меняется конфиг, продукт живёт. Это защита от риска изменения законодательства.\n\n6. DEFINITION OF DONE\n1) Исполнитель вводит часы с телефона менее чем за 60 секунд.\n2) Заказчик видит запись в панели менее чем через минуту.\n3) Светофор по 50 исполнителям считается менее чем за 5 секунд.\n4) Алерт «5/6» уходит заказчику автоматически.\n5) Ответ SMS «КОД 62» попадает в реестр без участия человека.\n6) Досье PDF скачивается из карточки.\n7) Все данные в РФ, согласие и лог собираются при первом входе.\n\n7. ПЛАН (2 недели разработки)\nДни 1–3: каркас FastAPI, модель, миграции.\nДни 4–6: ядро расчёта + API.\nДни 7–9: веб-кабинет заказчика.\nДни 10–12: страница исполнителя + SMS-шлюз.\nДни 13–14: алерты, PDF, приёмка по DoD. Мессенджеры — неделя 3.\nОткрытые вопросы до пилотов: трактовка «нулевых месяцев» и округления — сверить с текстом постановления № 760."},
-{file:"Soglasia_i_SMS_60_6.md",name:"Согласия и SMS-шаблоны",desc:"Два согласия по ФЗ-152, 11 шаблонов, чек-лист внедрения",type:"text",body:"СОГЛАСИЯ И SMS-ШАБЛОНЫ\n\nА. СОГЛАСИЕ НА ОБРАБОТКУ ПД (исполнитель)\nТребования (ст. 9 ФЗ-152, ред. с 01.09.2025): отдельный документ, не пункт оферты; галочка пустая по умолчанию; текст доступен ДО отметки.\nРеквизиты обязательны: наименование оператора (ИП/ООО «___», ИНН ___, ОГРН ___), перечень данных (номер телефона; часы по связкам; имя — добровольно), цели (расчёт часового лимита, напоминания), действия (сбор, запись, хранение, передача, блокирование, уничтожение), срок (до отзыва + 1 год), способ отзыва (кнопка «Удалить аккаунт» или письмо на ___@), место хранения — РФ.\nЛог согласия: дата, время, IP, версия текста. Смена текста = повторный сбор согласий.\n\nБ. СОГЛАСИЕ НА ПЕРЕДАЧУ ЗАКАЗЧИКУ\nОтдельным экраном после инвайт-ссылки: «Данные о ваших часах по связке с ООО „___“ будут переданы этой компании для целей учёта. Отметка обязательна — без неё подключение не завершается».\n\nВ. SMS-ПРАВИЛА\nВсе сообщения сервисные (основание: договор + согласие). Любая промо-фраза делает сообщение рекламным — запрет в регламенте. Отписка СТОП у каждого шаблона.\n\nГ. ШАБЛОНЫ (исполнитель)\nS1 приветствие: «Часовой лимит: вы подключены к панели {заказчик}. Ввод часов: {ссылка}. Отписка: СТОП»\nS2 напоминание: «Часовой лимит: укажите часы за {месяц} у {заказчик}. Сайт: {ссылка} или ответьте: {код} {число}»\nS3 дублирование: «Часовой лимит: ждали часы за {месяц} от вас. Ответьте: {код} {число}»\nS4 на грани: «Часовой лимит: у вас 5-й месяц подряд >60 ч у {заказчик}. В след. месяце заказы могут приостановить. Детали: {ссылка}»\nS5 подтверждение приёма: «Часовой лимит: принято — {N} ч за {месяц} у {заказчик}. Спасибо!»\nS6 предупреждение: «Часовой лимит: 3-й месяц подряд >60 ч у {заказчик}. Один месяц ≤60 ч сбрасывает счётчик»\nS7 хорошие новости: «Часовой лимит: вы уложились в 60 ч у {заказчик} — серия сброшена. Счётчик с нуля»\nS8 запрос уточнения: «Часовой лимит: часы за {месяц} у вас {N} ч. Если верно — ничего не делайте. Если нет — ответьте: {код} {число}»\nS9 отписка: «Вы отписаны от напоминаний. Вернуться: {ссылка}»\n(заказчик)\nZ1 еженедельный отчёт: «Светофор по {N} исполнителям готов: {K} на грани, {M} сработали. Панель: {ссылка}»\nZ2 алерт: «Часовой лимит: у {исполнитель} 5/6 месяцев >60 ч. Рекомендация в панели»\n\nСтоп-слова (нельзя): скидка, акция, попробуйте, успейте, подарок.\nДлина: 1–2 сегмента (70 символов кириллицей). Стоимость примерно 3–5 ₽ за SMS.\n\nД. ЧЕК-ЛИСТ ВНЕДРЕНИЯ\n[ ] Уведомление РКН о начале обработки ПД (реестр операторов) — до пилотов\n[ ] Согласия прогнать через юриста\n[ ] Имя отправителя SMS зарегистрировать у провайдера (до 2 недель)\n[ ] Лог каждого согласия: дата, время, IP, версия\n[ ] Хостинг и БД на серверах в РФ"},
-{file:"Oferta_i_porechenie_60_6.md",name:"Оферта и договор поручения",desc:"Оферта, поручение по ч. 3 ст. 6 ФЗ-152, схема ролей",type:"text",body:"ОФЕРТА И ДОГОВОР ПОРУЧЕНИЯ\n\nА. ОФЕРТА (ст. 437–438 ГК)\nАкцепт = регистрация + отметка в интерфейсе. Ключевые пункты:\n— Предмет: информационный сервис расчёта часового лимита по ч. 2.1 ст. 54.1 НК РФ (постановление Правительства № 760 от 01.10.2026).\n— Тарифы — отдельным приложением (можно менять без перепубликации оферты).\n— Право одностороннего приостановления при подозрении на обход лимита (занижение часов).\n— Ограничение ответственности: сервис информационный; решение о действиях с исполнителем принимает заказчик.\n— Запрет передачи данных третьим лицам без поручения; заказчик отвечает за согласия при дальнейшей передаче.\n— Реквизиты: ИП/ООО «___», ИНН ___, ОГРН ___ (совпадать с уведомлением РКН).\n\nБ. ДОГОВОР ПОРУЧЕНИЯ НА ОБРАБОТКУ ПД (ч. 3 ст. 6 ФЗ-152)\nРоли: заказчик — оператор ПД; сервис — обработчик по поручению. Обработчик согласия субъектов не собирает (конфиденциальность перед оператором); согласие на передачу — страховка сервиса.\n9 обязательных условий:\n1) перечень ПД: телефон, часы, имя (опц.), название связки;\n2) действия: сбор, запись, систематизация, хранение, передача, блокирование, уничтожение;\n3) цели: расчёт часового лимита, комплаенс-индикаторы;\n4) конфиденциальность;\n5) соблюдение ч. 5 ст. 18 и ст. 18.1 ФЗ-152;\n6) документы по запросу оператора;\n7) обеспечены безопасные условия обработки;\n8) соблюдение требований ст. 19 ФЗ-152;\n9) уведомление об инцидентах (ч. 3.1 ст. 21) без промедления.\nОтдельно зафиксировать:\n— срок возврата/уничтожения данных после расторжения (например, 30 дней);\n— субобработчики: только по письменному согласию, список в приложении (хостинг в РФ, SMS-провайдер)."},
-{file:"Pilotnyi_paket_60_6.md",name:"Пилотный пакет",desc:"Одностраничник, скрипт 15-минутного разговора, условия пилота",type:"text",body:"ПИЛОТНЫЙ ПАКЕТ\n\nА. ОДНОСТРАНИЧНИК (тезисы)\nЗаголовок: «Ваши исполнители-самозанятые могут выпасть из графика уже весной — узнайте, кого из них остановить заранее».\nБоль: постановление Правительства № 760 (действует с 01.10.2026 до 01.10.2032): исполнитель с 60+ часами в месяц 6 месяцев подряд — индикатор риска переквалификации, доначислений, взносов.\nПродукт: радар по каждому исполнителю — светофор, алерт на 5-м месяце, досье осмотрительности для проверки.\nЧем отличается: считаем до срабатывания, а не объясняем после. Досье «мы знали и действовали».\nПилот: месяц бесплатно, до 20 исполнителей, панель + еженедельный светофор.\n\nБ. СКРИПТ 15 МИНУТ (правило: не показывать продукт, пока не рассказал, как решает сам)\n1. Контекст: «Как в компании устроен учёт самозанятых?» (2 мин)\n2. Ключевой вопрос: «Как вы отслеживаете часы и счётчики по каждому исполнителю?» — ответ = карта конкурентов и обходов. (5 мин)\n3. Уточнения: сколько человек, кто отвечает, ловили ли вопросы ФНС?\n4. Проверочный вопрос-хедж: «Если критерий изменят или отменят — как вы будете учитывать часы исполнителей?» Ответ «всё равно нужно» = покупатель учёта. Ответ «тогда и не нужно» = покупатель страха.\n5. Только теперь показ: панель, алерт 5/6, досье. (3 мин)\n6. Ценность: «что бы это изменило в вашем процессе?»\n7. Закрытие: пилот-оффер.\nТри исхода: горячий (сразу в пилот) / тёплый (демо на неделе) / холодный (просьба подсказать кадрам или бухгалтерии).\n\nВ. УСЛОВИЯ ПИЛОТА (проговорить ДО подключения)\nВзамен бесплатного месяца:\n1) опрос обратной связи;\n2) право на обезличенный кейс;\n3) интервью о процессе закупки таких сервисов;\n4) решение о тарифе (4900 ₽/мес) в течение 2 недель.\nПравило: не более 3 пилотов одновременно.\n\nГ. КРИТЕРИИ УСПЕХА\n≥70% приглашённых подключились за неделю; ≥60% отправили данные без ручных напоминаний; заказчик открыл панель 3+ раз за месяц; ≥2 из 5 попросили счёт.\n\nД. ШАБЛОНЫ СООБЩЕНИЙ\nЧат: «Здравствуйте! Мы делаем сервис контроля часового лимита самозанятых (правило 60/6 по постановлению Правительства № 760). Проводим короткие интервью с компаниями — не для продажи, а чтобы проверить гипотезу. Можно 15 минут?»\nЛичка: «Привет! Занимаюсь проектом для заказчиков самозанятых — ловим риск „60+ часов 6 месяцев подряд“ ДО срабатывания. У вас такое отслеживается? Хочу понять, как вы сейчас это решаете».\nEmail (тема): Самозанятые 60/6: узнаём риски заранее.\nEmail (тело): 3 абзаца — боль (постановление № 760), что даёт сервис, предложение 15-минутного звонка.\nFollow-up (день 2): «Успели глянуть? Если тема не сейчас — просто скажите, не буду дёргать»."},
-{file:"Opros_i_kanaly_60_6.md",name:"Опрос и каналы публикации",desc:"Тексты опроса, конкретные сообщества по направлениям, таблица контактов, ритм касаний",type:"text",body:"ОПРОС И КАНАЛЫ ПУБЛИКАЦИИ\n\n=== ЧАСТЬ 1. ТЕКСТЫ ОПРОСА ===\n\nА. Бухгалтерские чаты\n«Пишу исследовательскую работу по учёту самозанятых после постановления Правительства № 760 (правило 60/6, действует с 01.10.2026). Помогите 5 вопросами: 1) Сколько у вас самозанятых? 2) Как учитывается их время? 3) Отслеживаете ли часы каждого? 4) Были ли вопросы от ФНС? 5) Если бы сервис показывал риск по каждому заранее — обратили бы внимание?»\n\nБ. Бизнес-чаты, селлеры\n«Ваш исполнитель может внезапно „замереть“ на два месяца — теперь это официально: 60+ часов 6 месяцев подряд = индикатор риска (постановление № 760). 5 коротких вопросов: как вы сейчас это отслеживаете?»\n\nВ. Отраслевые чаты (клининг, склад, стройка, общепит)\n«Ваш лучший исполнитель весной может выпасть на два месяца — это не про настроение, а про 60/6: 60+ часов 6 месяцев подряд = индикатор риска (постановление № 760). Как вы сейчас отслеживаете часы каждого? 5 вопросов».\n\nГ. Личное сообщение\n«Привет! Занимаюсь проектом контроля часового лимита самозанятых. Хочу 15 минут интервью — не продажа, а проверка гипотезы. Расскажешь, как у вас сейчас устроен учёт?»\n\n=== ЧАСТЬ 2. КУДА ПУБЛИКОВАТЬ ===\n\nПравило нулевое: перед публикацией прочитать правила чата. Если реклама запрещена — писать админу с формулировкой «проводим исследование, не продажа» или публиковать вариант А: он составлен как исследовательский запрос и реже попадает под запрет рекламы.\n\nА1. Бухгалтерские (вариант А)\n1. «Красный уголок бухгалтера» (сообщество Клерка) — крупнейшее бухгалтерское сообщество; при нём есть «Чат для бухгалтеров» и бот вопросов @kubklekr_bot: ваш вопрос публикуется от лица подписчиков — мягкий вход без прямого поста.\n2. «Бухгалтер в доме» (@buhruchat) — чат бухгалтеров на удалёнке; при канале @buhru. Реклама не приветствуется — идти через бота или админа.\n3. Каналы с присоединёнными чатами: «Упрощёнка», «Контур для бухгалтера», «Типичный бухгалтер», «Нетипичный бухгалтер», «Бухгалтерия и налоги» (журнал Главбух) — искать по названию в поиске Telegram.\n4. Канал 1С:УНФ (@small_biz) и чат УНФ — бухгалтеры малых компаний, наши ЛПРы.\n\nБ1. Бизнес и селлеры (вариант Б)\n1. «БИЗНЕС ЧАТ | ПРЕДПРИНИМАТЕЛИ» — около 110 тыс. участников, модерируется.\n2. «БИЗНЕС-ЧАТ № 1 | Предприниматели | Нетворкинг» — около 30 тыс.\n3. «Бизнес в Питере» (@bizness_spb) — нетворкинг-канал СПб, при нём чат.\n4. «Беседа Самозанятые.рф» (@selfworkchat) — самозанятые И заказчики, публикующие вакансии: обе наши аудитории в одном месте.\n5. @udalenka_be_like — про работу с фрилансерами и самозанятыми.\n6. Чаты продавцов WB/Ozon — селлеры нанимают самозанятых на сборку и доставку.\n\nВ1. Отраслевые (вариант В)\nКлининг:\n1. «Клининг.Топ Москва» (@MoscowKlining) и «Москва: Горничные Клининг Уборка» (@v_moskvefe) — крупнейшие чаты индустрии (12–22 тыс.).\n2. CleanNow (@cleannowrussia), «Экономика клининга» (@economycleaning), «Мир клининга» (@cleanpress).\n3. Для СПб/ЛО: tgstat.ru → тег «клининг» → чаты своего города; чат клинеров MAX.\nОбщепит: чат «Бизнес, деньги, общепит» — гостинично-ресторанный бизнес.\nСклад/логистика: чаты владельцев ПВЗ («СПб ПВЗ чат» и аналоги).\nСтройподряд: TGStat по словам «ремонт», «стройка» — чаты прорабов и бригадиров.\n\nГ1. Региональные (ЛО и СПб) — самый тёплый контур, начинать с него\n1. «Мой бизнес 47» (Фонд поддержки предпринимательства Ленинградской области, 813.ru) — свой телеграм-канал и мероприятия; написать администратору: «проводим исследование по учёту самозанятых в 47 регионе» — фонды охотно дают площадку.\n2. Всеволожский ЦПП — чат предпринимателей Всеволожского района (@fpvsevolozhsk).\n3. «Мой бизнес | ЦРПП Санкт-Петербург» (@crpp_spb) — центр поддержки предпринимателей СПб.\n4. Местные группы Соснового Бора во ВКонтакте — для личных связей: «кто работает с самозанятыми?» у соседей работает лучше рассылок.\n\nД1. Как искать ещё (алгоритм на 15 минут)\n1. tgstat.ru → поиск: «самозанятые», «клининг», «подряд», «общепит» → сортировка по охвату → выбирать чаты, а не только каналы.\n2. Поиск Telegram: название отрасли + слово «чат».\n3. TenChat — поиск «клининг СПб», «стройподряд» — можно писать в личку без вступления в группу.\n4. ВКонтакте — группы отраслей и городов.\n\nЕ1. Порядок действий (20 минут)\n1. Вступить в 3–5 сообществ: 2 бухгалтерских + 1–2 региональных + 1 отраслевое.\n2. Прочитать правила каждого; при сомнении — сообщение админу с текстом варианта А.\n3. Опубликовать вариант А там, где разрешено сразу.\n4. Ссылки на публикации — в журнал пульта.\n\n=== ЧАСТЬ 3. РАБОТА С КОНТАКТАМИ ===\n\nКонтакты, ответы на опрос и реестр сообществ ведите во вкладке «📋 Контакты» пульта — там три таблицы: «Сообщества» (ссылки и параметры входа), «Контакты» (10 колонок) и «Ответы на опрос». Экспорт в CSV — кнопками рядом с таблицами.\n\nД. ТАБЛИЦА КОНТАКТОВ (10 колонок)\nИмя | Компания | Роль | Источник | Отрасль | Число самозанятых | Статус (новый → опрос → интервью → пилот-кандидат → отказ) | Дата касания | Следующее действие | Заметки\n\nЕ. ИСТОЧНИКИ 20+ КОНТАКТОВ\n1) Ответы на опрос в сообществах (5–8).\n2) Отраслевые чаты: клининг, логистика, стройподряд, общепит (по 2–4).\n3) HH.ru и Авито Работа: вакансии «уборщик/кладовщик/курьер по договору с самозанятым» — компания и ЛПР известны.\n4) Личные связи — начинать с них.\n\nЖ. КВАЛИФИКАЦИЯ ДО ИНТЕРВЬЮ (3 вопроса)\nСколько самозанятых? (меньше 10 — вежливый отказ, в базу на будущее)\nКто отвечает за учёт?\nЛовили ли вопросы ФНС? (такие — в пилот без очереди)\n\nЗ. РИТМ КАСАНИЙ\nДень 0 — опрос; день 2 — короткий пинг; день 7 — последний пинг; статус «холодный», возврат через месяц. После интервью — благодарность и резюме в тот же день.\n\nИ. МЕТРИКА НЕДЕЛИ\n20 контактов с заполненными действиями, 8–10 интервью, ≥3 «сделайте — куплю»."},
-{file:"Finmodel_60_6.md",name:"Финмодель (опорные цифры)",desc:"Тарифы, юнит-экономика, целевой путь MRR",type:"text",body:"ФИНМОДЕЛЬ (опорные цифры)\n\nТарифы:\n— Старт 4 900 ₽/мес — до 20 исполнителей;\n— Бизнес 9 900 ₽/мес — до 100 исполнителей;\n— Корпоративный 14 900 ₽+ — без ограничений.\n\nСебестоимость на клиента в месяц:\n— SMS: примерно 150–300 ₽ (3 SMS на исполнителя × 20 исполнителей);\n— хостинг: около 50 ₽ на клиента.\nВаловая маржа — около 90%.\n\nЦелевой путь:\n— декабрь: 3 пилота бесплатно;\n— январь: 2 оплаты → MRR 9 800 ₽;\n— март (волна вопросов ФНС): 5 клиентов → MRR 24 500 ₽;\n— июнь: 12 клиентов → MRR около 59 000 ₽.\n\nТочка выхода на фриланс-разработку: MRR ≥ 30 000 ₽ устойчиво 3 месяца. До этого — развитие руками основателя.\n\nГоризонт нормы: постановление № 760 действует до 01.10.2032 — за это время успевается полный цикл валидации, монетизации и одного витка масштабирования даже в худшем сценарии."},
-{file:"Panel_60_6.html",name:"Панель 60/6 (рабочая)",desc:"Панель заказчика, вход исполнителя по коду, публичный калькулятор. Скачайте и откройте отдельно",type:"html",body:"<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Панель 60/6 — демо-данные</title>\n<style>\nbody{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#222}\nheader{background:#1e3a5f;color:#fff;padding:12px 16px}\nnav{display:flex;gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid #ddd;flex-wrap:wrap}\nnav button{padding:7px 12px;border:1px solid #ccc;background:#fff;border-radius:8px;cursor:pointer}\nnav button.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}\nmain{max-width:900px;margin:0 auto;padding:12px}\n.card{background:#fff;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;margin-bottom:10px}\ntable{border-collapse:collapse;width:100%;font-size:13px}\nth,td{border:1px solid #e2e6ea;padding:6px 8px;text-align:center}\nth{background:#eef2f7}\n.st{padding:2px 8px;border-radius:6px;font-size:12px;white-space:nowrap}\n.fire{background:#fdeeee;color:#c0392b}.edge{background:#fff7e0;color:#a07000}.warn{background:#eef4ff;color:#1e5aa8}.ok{background:#e9f7ef;color:#1e8e4e}\ninput{padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:14px;width:70px}\n.big{font-size:15px;padding:8px 14px;border-radius:8px;border:1px solid #1e3a5f;background:#1e3a5f;color:#fff;cursor:pointer}\nh2{font-size:16px}\n</style>\n</head>\n<body>\n<header><h2>🚦 Панель «Часовой лимит 60/6» — демо-данные</h2></header>\n<nav><button data-t=\"p\" class=\"on\">Панель</button><button data-t=\"e\">Исполнитель</button><button data-t=\"c\">Калькулятор</button></nav>\n<main id=\"m\"></main>\n<script>\nvar M=[\"авг\",\"сен\",\"окт\",\"ноя\",\"дек\",\"янв\"];\nvar P=[\n{n:\"Иванов И.И.\",code:\"A7K2\",c:\"ООО СтройПодряд\",h:[55,58,60,61,60,61]},\n{n:\"Петрова А.С.\",code:\"M3P9\",c:\"ООО СтройПодряд\",h:[50,60,61,60,61,61]},\n{n:\"Кузнецов Д.В.\",code:\"K4T8\",c:\"КлинСервис\",h:[60,61,62,58,60,0]},\n{n:\"Дмитриев О.П.\",code:\"D1R6\",c:\"КлинСервис\",h:[40,45,50,48,55,58]},\n{n:\"Власова М.К.\",code:\"V8L2\",c:\"ИП Орлова\",h:[62,61,60,59,60,61]}\n];\nfunction ser(h){var s=0;for(var i=h.length-1;i>=0;i--){if(h[i]>=60)s++;else break}return s}\nfunction st(h){var s=ser(h);if(s>=6)return[\"Сработал — пауза до 15.02\",\"fire\"];if(s===5)return[\"На грани 5/6\",\"edge\"];if(s>=3)return[\"Предупреждение \"+s+\"/6\",\"warn\"];return[\"Безопасно\",\"ok\"]}\nfunction pm(h){var s=ser(h);if(s>=6)return\"пауза активна\";if(s===5)return\"сработает в след. месяце\";if(s>=3)return\"риск через \"+(6-s)+\" мес.\";return\"—\"}\nvar tab=\"p\";\nfunction esc(s){return String(s).replace(/</g,\"&lt;\")}\nfunction render(){\nvar m=document.getElementById(\"m\"),h=\"\";\ndocument.querySelectorAll(\"nav button\").forEach(function(b){b.classList.toggle(\"on\",b.dataset.t===tab)});\nif(tab===\"p\"){\nh+=\"<h2>Алерты</h2>\";\nP.forEach(function(p){var a=st(p.h);if(a[1]===\"fire\"||a[1]===\"edge\")h+='<div class=\"card\"><b>'+esc(p.n)+\"</b> — \"+a[0]+\" (\"+esc(p.c)+\"). \"+(a[1]===\"edge\"?\"Рекомендация: не наращивать объёмы в след. месяце; документируйте осмотрительность.\":\"Исполнитель на паузе — не допускать приёма заказов.\")+\"</div>\"});\nh+=\"<h2>Реестр исполнителей</h2><div class='card'><table><tr><th>Исполнитель</th><th>Заказчик</th>\";\nM.forEach(function(x){h+=\"<th>\"+x+\"</th>\"});\nh+=\"<th>Серия</th><th>Статус</th><th>Прогноз</th></tr>\";\nP.forEach(function(p){var a=st(p.h);h+=\"<tr><td style='text-align:left'>\"+esc(p.n)+\"</td><td style='text-align:left'>\"+esc(p.c)+\"</td>\";\np.h.forEach(function(v){h+=\"<td\"+(v>=60?\" style='color:#c0392b;font-weight:bold'\":\"\")+\">\"+(v||\"—\")+\"</td>\"});\nh+=\"<td>\"+ser(p.h)+\"/6</td><td><span class='st \"+a[1]+\"'>\"+a[0]+\"</span></td><td>\"+pm(p.h)+\"</td></tr>\"});\nh+=\"</table></div>\";\n}else if(tab===\"e\"){\nh+='<h2>Вход исполнителя (демо-коды: A7K2, M3P9, K4T8, D1R6, V8L2)</h2><div class=\"card\"><input id=\"cd\" placeholder=\"Код\" size=\"10\"> <button class=\"big\" id=\"go\">Войти</button><div id=\"ew\" style=\"margin-top:10px;color:#c0392b\"></div></div><div id=\"ep\"></div>';\n}else{\nh+='<h2>Публичный калькулятор 60/6</h2><div class=\"card\">Введите часы за последние 6 месяцев: <div style=\"margin:10px 0\">';\nM.forEach(function(x){h+=x+\": <input class='cc' type='number' min='0' max='500'> \"});\nh+='</div><button class=\"big\" id=\"calc\">Проверить</button><div id=\"cv\" style=\"margin-top:12px;font-size:15px\"></div></div><div class=\"card\" style=\"background:#eef4ff\">Вы заказчик? Панель контроля по всем исполнителям — свяжитесь с нами.</div>';\n}\nm.innerHTML=h;\nif(tab===\"e\"){document.getElementById(\"go\").onclick=function(){\nvar c=document.getElementById(\"cd\").value.trim().toUpperCase(),p=P.filter(function(x){return x.code===c})[0];\nif(!p){document.getElementById(\"ew\").textContent=\"Код не найден. Попробуйте демо-код.\";return}\nvar a=st(p.h);\ndocument.getElementById(\"ep\").innerHTML='<div class=\"card\"><b>'+esc(p.n)+\"</b>, \"+esc(p.c)+'<div style=\"margin:8px 0\">Ваши часы: '+p.h.map(function(v,i){return M[i]+\": \"+(v||\"—\")+(v>=60?\" ⚠\":\"\")}).join(\", \")+'</div><div><span class=\"st '+a[1]+'\">'+a[0]+\"</span></div><div style='margin:10px 0'>Часы за текущий месяц (\"+M[5]+\"): <input id='nh' type='number' min='0' max='500'> <button class='big' id='sv'>Сохранить</button></div><div id='am' style='color:#a07000;font-size:13px'></div></div>\";\ndocument.getElementById(\"sv\").onclick=function(){\nvar v=+document.getElementById(\"nh\").value;if(isNaN(v)){document.getElementById(\"am\").textContent=\"Введите число\";return}\np.h[5]=v;render();tab=\"e\";document.getElementById(\"cd\").value=c;document.getElementById(\"go\").click();\n};\n};\n}\nif(tab===\"c\"){document.getElementById(\"calc\").onclick=function(){\nvar vs=[].map.call(document.querySelectorAll(\".cc\"),function(x){return +x.value}),bad=vs.some(function(v){return isNaN(v)});\nif(bad){document.getElementById(\"cv\").textContent=\"Заполните все 6 месяцев\";return}\nvar s=ser(vs);\ndocument.getElementById(\"cv\").innerHTML=s>=6?\"<b>Серия 6/6 достигнута.</b> Сработал индикатор: пауза до следующего месяца. Один месяц ≤60 ч сбрасывает счётчик.\":s===5?\"<b>Серия 5/6.</b> Ещё один месяц с 60+ ч — и индикатор сработает. Рекомендация: снизить часы в след. месяце.\":s>=3?\"Предупреждение: серия \"+s+\"/6. Пока не критично, но темп стоит снизить.\":\"Всё в порядке: серия \"+s+\"/6.\";\n}}\n}\ndocument.querySelectorAll(\"nav button\").forEach(function(b){b.onclick=function(){tab=b.dataset.t;render()}});\nrender();\n</scr"+"ipt>\n</body>\n</html>"}
-];
-/* ===== СОСТОЯНИЕ ===== */
-var S;
-try{var _pd=document.getElementById("pdata"),_txt=(_pd&&_pd.textContent||"").trim();
-if(_txt&&_txt!=="{}"){S=JSON.parse(_txt);try{localStorage.setItem("r606",JSON.stringify(S))}catch(e){}}
-else{S=JSON.parse(localStorage.getItem("r606")||"{}")}}catch(e){S={}}
-if(!S)S={};
-if(!S.dates)S.dates={};
-if(!S.contacts)S.contacts=[];
-if(!S.answers)S.answers=[];
-if(!S.communities)S.communities=[];
-TASKS.forEach(function(t){if(S["d"+t.id]===undefined)S["d"+t.id]=false;if(!S["r"+t.id])S["r"+t.id]="";});
-if(!S.extra)S.extra=[];if(!S.log)S.log="";
-S.extra.forEach(function(t,i){if(S["d"+"x"+i]===undefined)S["d"+"x"+i]=false;if(!S["r"+"x"+i])S["r"+"x"+i]="";});
-if(!S.logInit){S.log="[15.11.2026] Правовая база обновлена: критерий 60/6 — постановление Правительства № 760 от 01.10.2026, действует до 01.10.2032. Сегмент — прямые договоры (14 отраслей), платформы контролируют свои часы; наша ценность — сбор часов со всех связок в одном месте. Порог 60 и период 6 — параметры конфига.\n\n[15.11.2026] ИДЕЯ №2: «Штурманский пульт для всех». Суть: сервис с ИИ-разбивкой целей на этапы с учётом загруженности; соисполнители по ссылке на этап или цель; бытовые задачи; сдвиг дат — только владелец; ИИ разбирает этапы и хранит материалы.\nУзкие места: «для всех» = ни для кого (нужен клин: пары / дуэты по целям / мини-команды); ретеншн (планировщики бросают за 2–3 недели — продаём социальную связку, не тудушку); холодный старт ИИ (загруженность неизвестна); ИИ предлагает — человек редактирует; матрица прав (отметка, приёмка, приватность); конфликты редактирования; стоимость LLM; синхронизация и уведомления обязательны с первого дня; 152-ФЗ и на соисполнителей; конкуренция (Motion, WEEEK) — пробиваться клином.\nСтруктура: Ф0 разведка с 01.12 (опросы 3 клина, 6–8 интервью; выход ≥3 «куплю», смерть <2 из 8) → Ф1 консьерж дек–янв (3 дуэта, ручная поддержка; выход ≥50% этапов закрыто) → Ф2 MVP фев–мар (FastAPI+Postgres, ссылки-приглашения, Telegram-бот, 1 ИИ-сценарий) → Ф3 платный пилот апр (5–10 команд по 299 ₽/мес; выход ≥3 платящих) → Ф4 ревизия май.\nРЕШЕНИЕ: мораторий на Идею №2 до 30.11 (миддл-чек 60/6). Разрешена только разведка: 1 опрос в 2–3 чатах.\n\n[15.11.2026] Ответ на сомнение об отмене нормы: даже в худшем сценарии (отмена в 2028-м) успеваем цикл валидации и первых клиентов; на интервью добавлен вопрос-хедж «если критерий изменят — как будете учитывать часы?» (отличает покупателя учёта от покупателя страха).\n\n[15.11.2026] Опрос и каналы публикации объединены в один документ. В карту добавлена вкладка «Контакты»: таблица сообществ (ссылки, параметры входа, статус публикации), таблица контактов (10 колонок) и таблица ответов на опросники, экспорт в CSV.\n";
-S.logInit=true;}
-var tab="today",curDoc=null;
-/* ===== АВТОСОХРАНЕНИЕ В ФАЙЛ (Chrome/Edge) ===== */
-var fileHandle=null,saveTimer=null,fsOK=!!window.showSaveFilePicker;
-function idbGet(){return new Promise(function(res){try{var rq=indexedDB.open("r606h",1);rq.onupgradeneeded=function(e){e.target.result.createObjectStore("k")};rq.onsuccess=function(e){var db=e.target.result;var tx=db.transaction("k","readonly").objectStore("k").get("fh");tx.onsuccess=function(){res(tx.result||null)}};rq.onerror=function(){res(null)}}catch(e){res(null)}})}
-function idbSet(h){try{var rq=indexedDB.open("r606h",1);rq.onupgradeneeded=function(e){e.target.result.createObjectStore("k")};rq.onsuccess=function(e){var db=e.target.result;db.transaction("k","readwrite").objectStore("k").put(h,"fh")}}catch(e){}}
-function setSv(t){var el=document.getElementById("svs");if(el)el.textContent=t}
-function syncDataTag(){var el=document.getElementById("pdata");if(el)el.textContent=JSON.stringify(S)}
-async function writeFile(){
- if(!fileHandle)return;
- try{
-  syncDataTag();
-  var html="<!DOCTYPE html>\n"+document.documentElement.outerHTML;
-  var w=await fileHandle.createWritable();
-  await w.write(html);await w.close();
-  setSv("✓ записано в файл, "+new Date().toLocaleTimeString());
- }catch(e){setSv("не удалось записать: "+e.message)}
-}
-function queueWrite(){if(!fileHandle)return;clearTimeout(saveTimer);saveTimer=setTimeout(writeFile,800)}
-function save(){
- try{localStorage.setItem("r606",JSON.stringify(S))}catch(e){}
- queueWrite();
-}
-async function initFileLink(){
- var h=await idbGet();
- if(!h)return;
- try{
-  var p=await h.queryPermission({mode:"readwrite"});
-  if(p==="granted"){fileHandle=h;document.getElementById("btnAuto").textContent="🔗 Автосохранение: файл подключён";setSv("автосохранение активно");}
-  else{setSv("файл найден — нажмите «Автосохранение», чтобы вернуть доступ");}
- }catch(e){}
-}
-document.getElementById("btnAuto").onclick=async function(){
- if(!fsOK){alert("Автосохранение в файл работает в Chrome и Edge. В этом браузере пользуйтесь «💾 Сохранить резерв».");return}
- try{
-  var h=await showSaveFilePicker({suggestedName:"Дорожная карта 60-6.html",types:[{description:"HTML",accept:{"text/html":[".html"]}}]});
-  fileHandle=h;idbSet(h);
-  document.getElementById("btnAuto").textContent="🔗 Автосохранение: файл подключён";
-  await writeFile();
- }catch(e){if(e&&e.name!=="AbortError")setSv("ошибка: "+e.message)}
-};
-document.getElementById("btnBackup").onclick=function(){
- var b=new Blob([JSON.stringify(S,null,2)],{type:"application/json;charset=utf-8"});
- var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="pult_606_backup.json";a.click();
- setSv("резерв скачан");
-};
-document.getElementById("btnRestore").onclick=function(){document.getElementById("fileRestore").click()};
-document.getElementById("fileRestore").onchange=function(e){
- var f=e.target.files[0];if(!f)return;
- var r=new FileReader();
- r.onload=function(){
-  try{
-   var d=JSON.parse(r.result);S=d;
-   if(!S.contacts)S.contacts=[];if(!S.answers)S.answers=[];if(!S.communities)S.communities=[];
-   TASKS.forEach(function(t){if(S["d"+t.id]===undefined)S["d"+t.id]=false;if(!S["r"+t.id])S["r"+t.id]="";});
-   S.extra.forEach(function(t,i){if(S["d"+"x"+i]===undefined)S["d"+"x"+i]=false;if(!S["r"+"x"+i])S["r"+"x"+i]="";});
-   save();render();setSv("данные восстановлены из резервной копии");
-  }catch(err){alert("Файл не похож на резерв пульта: "+err.message)}
- };
- r.readAsText(f);
-};
-/* ===== УТИЛИТЫ ===== */
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function today(){var d=new Date();d.setHours(0,0,0,0);return d}
-function pd(s){var p=String(s).split("-");return new Date(+p[0],p[1]-1,+p[2])}
-function iso(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
-function fmt(d){return d.getDate()+" "+["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"][d.getMonth()]}
-function edate(t){return (S.dates&&S.dates[t.id])?S.dates[t.id]:t.date}
-function tcell(f,i,v){return '<td><input data-cf="'+f+'" data-ci="'+i+'" value="'+esc(v||"")+'"></td>'}
-function tcella(f,i,v){return '<td><input data-af="'+f+'" data-ai="'+i+'" value="'+esc(v||"")+'"></td>'}
-function tcells(f,i,v){return '<td><input data-sf="'+f+'" data-si="'+i+'" value="'+esc(v||"")+'"></td>'}
-function selOpts(arr,cur){var h="";arr.forEach(function(o){h+='<option'+(o===cur?" selected":"")+'>'+o+'</option>'});return h}
-function csvCell(v){v=String(v==null?"":v);return '"'+v.replace(/"/g,'""')+'"'}
-function csvRows(headers,rows){return [headers.map(csvCell).join(";")].concat(rows.map(function(r){return r.map(csvCell).join(";")})).join("\r\n")}
-function dlFile(name,content,mime){
- var b=new Blob(["\uFEFF"+content],{type:mime+";charset=utf-8"});
- var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();
-}
-function csvContacts(){
- var headers=["Имя","Компания","Роль","Источник","Отрасль","Самозанятых","Статус","Дата касания","Следующее действие","Заметки"];
- var rows=S.contacts.map(function(c){return[c.name,c.company,c.role,c.src,c.ind,c.cnt,c.status,c.date,c.next,c.notes]});
- dlFile("contacts_606.csv",csvRows(headers,rows),"text/csv");
-}
-function csvAnswers(){
- var headers=["Дата","Кто ответил","Где (чат/канал)","1. Сколько самозанятых","2. Как учитывается","3. Часы отслеживают","4. Вопросы ФНС","5. Обратили бы внимание","Статус","Заметки"];
- var rows=S.answers.map(function(a){return[a.date,a.who,a.src,a.a1,a.a2,a.a3,a.a4,a.a5,a.status,a.notes]});
- dlFile("answers_606.csv",csvRows(headers,rows),"text/csv");
-}
-function csvCommunities(){
- var headers=["Название","Тип","Ссылка","Аудитория","Правила по рекламе","Статус","Дата публикации","Заметки / параметры входа"];
- var rows=S.communities.map(function(c){return[c.name,c.type,c.link,c.aud,c.rules,c.status,c.date,c.notes]});
- dlFile("communities_606.csv",csvRows(headers,rows),"text/csv");
-}
-function card(t){
- var done=S["d"+t.id],due=pd(edate(t)),T=today();
- var over=!done&&due<T;
- return '<div class="card'+(done?" done":over?" over":"")+'">'
- +'<div class="row"><input type="checkbox" data-check="'+t.id+'"'+(done?" checked":"")+'><div class="tt">'
- +"<b>"+esc(t.title)+"</b><span class=\"tag"+(over?" due":"")+'">'+(done?"выполнено":fmt(due)+(over?" — просрочено":""))+"</span>"
- +'<div class="desc">'+esc(t.desc)+"</div>"
- +'<div class="crit"><b>Критерий:</b> '+esc(t.crit)+"</div>"
- +'<textarea data-report="'+t.id+'" placeholder="Отчёт о выполнении: факт, цифра или причина переноса...">'+esc(S["r"+t.id])+"</textarea>"
- +'<button class="btn pp" data-postpone="'+t.id+'">📅 Перенести</button>'
- +"</div></div></div>";
-}
-/* ===== РЕНДЕР ===== */
-function render(){
- var m=document.getElementById("main"),h="";
- document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.tab===tab)});
- var T=today(),total=TASKS.length+S.extra.length;
- var dn=TASKS.filter(function(t){return S["d"+t.id]}).length+S.extra.filter(function(t,i){return S["d"+"x"+i]}).length;
- document.getElementById("pbar").style.width=total?(100*dn/total)+"%":"0";
- document.getElementById("pcount").textContent="Сделано: "+dn+" из "+total;
- if(tab==="today"){
-  h+="<h2>Горит сегодня</h2>";
-  var list=TASKS.filter(function(t){return !S["d"+t.id]&&pd(edate(t))<=T});
-  S.extra.forEach(function(t,i){if(!S["d"+"x"+i]&&pd(edate({id:"x"+i,date:t.date}))<=T)list.push({id:"x"+i,date:t.date,title:t.title,desc:t.desc||"",crit:t.crit})});
-  if(!list.length)h+='<div class="hint">На сегодня задач нет. Загляните на вкладку «Неделя» — подготовьтесь заранее.</div>';
-  list.sort(function(a,b){return a.date<b.date?-1:1}).forEach(function(t){h+=card(t)});
- }else if(tab==="week"){
-  h+="<h2>Ближайшие 7 дней</h2>";
-  var wk=new Date(T);wk.setDate(wk.getDate()+7);
-  var list2=TASKS.filter(function(t){var d=pd(edate(t));return d>=T&&d<=wk});
-  S.extra.forEach(function(t,i){var d=pd(edate({id:"x"+i,date:t.date}));if(d>=T&&d<=wk)list2.push({id:"x"+i,date:t.date,title:t.title,desc:t.desc||"",crit:t.crit})});
-  if(!list2.length)h+='<div class="hint">В ближайшую неделю новых задач нет.</div>';
-  list2.sort(function(a,b){return a.date<b.date?-1:1}).forEach(function(t){h+=card(t)});
- }else if(tab==="crm"){
-  h+='<h2>🌐 Сообщества</h2><div class="hint">Реестр площадок: где вступили, где опубликовали опрос, где ждёт одобрения админа. В «Заметках» держите параметры входа: через кого вступили, когда одобрили, что разрешил админ.</div>'
-  +'<button class="btn" id="addS">＋ Добавить сообщество</button> <button class="btn" id="csvS">⬇ Экспорт CSV</button>'
-  +'<div class="crmwrap"><table class="crm"><tr><th>Название</th><th>Тип</th><th>Ссылка</th><th>Аудитория</th><th>Правила по рекламе</th><th>Статус</th><th>Дата публикации</th><th>Заметки / параметры входа</th><th></th></tr>';
-  if(!S.communities.length)h+='<tr><td colspan="9" class="empty">Пока пусто — добавьте площадки из документа «Опрос и каналы публикации».</td></tr>';
-  S.communities.forEach(function(c,i){
-   h+='<tr>'
-   +tcells('name',i,c.name)
-   +'<td><select data-sf="type" data-si="'+i+'">'+selOpts(SCTY,c.type)+'</select></td>'
-   +tcells('link',i,c.link)
-   +tcells('aud',i,c.aud)
-   +tcells('rules',i,c.rules)
-   +'<td><select data-sf="status" data-si="'+i+'">'+selOpts(SCST,c.status)+'</select></td>'
-   +'<td><input data-sf="date" data-si="'+i+'" value="'+esc(c.date||"")+'" placeholder="ГГГГ-ММ-ДД"></td>'
-   +tcells('notes',i,c.notes)
-   +'<td><button class="del" data-sx="'+i+'" title="Удалить">✕</button></td></tr>';
-  });
-  h+='</table></div>';
-  h+='<h2>👥 Контакты</h2><div class="hint">Планируйте касания: статус, дата, следующее действие. Сохраняется вместе с картой (и в файл, если подключено автосохранение).</div>'
-  +'<button class="btn" id="addC">＋ Добавить контакт</button> <button class="btn" id="csvC">⬇ Экспорт CSV</button>'
-  +'<div class="crmwrap"><table class="crm"><tr><th>Имя</th><th>Компания</th><th>Роль</th><th>Источник</th><th>Отрасль</th><th>Самозанятых</th><th>Статус</th><th>Дата касания</th><th>След. действие</th><th>Заметки</th><th></th></tr>';
-  if(!S.contacts.length)h+='<tr><td colspan="11" class="empty">Пока пусто — добавьте первого контакта.</td></tr>';
-  S.contacts.forEach(function(c,i){
-   h+='<tr>'
-   +tcell('name',i,c.name)
-   +tcell('company',i,c.company)
-   +tcell('role',i,c.role)
-   +tcell('src',i,c.src)
-   +tcell('ind',i,c.ind)
-   +'<td><input data-cf="cnt" data-ci="'+i+'" value="'+esc(c.cnt||"")+'"></td>'
-   +'<td><select data-cf="status" data-ci="'+i+'">'+selOpts(CST,c.status)+'</select></td>'
-   +'<td><input data-cf="date" data-ci="'+i+'" value="'+esc(c.date||"")+'" placeholder="ГГГГ-ММ-ДД"></td>'
-   +tcell('next',i,c.next)
-   +tcell('notes',i,c.notes)
-   +'<td><button class="del" data-cx="'+i+'" title="Удалить">✕</button></td></tr>';
-  });
-  h+='</table></div>';
-  h+='<h2>📝 Ответы на опрос</h2><div class="hint">Одна строка — один ответ. В5 «обратили бы внимание» — главный сигнал: дословные фразы вроде «сделайте — куплю» пишите сюда. К миддл-чеку 30.11 считаем по статусу «куплю».</div>'
-  +'<button class="btn" id="addA">＋ Добавить ответ</button> <button class="btn" id="csvA">⬇ Экспорт CSV</button>'
-  +'<div class="crmwrap"><table class="crm"><tr><th>Дата</th><th>Кто ответил</th><th>Где (чат/канал)</th><th>1. Сколько самозанятых</th><th>2. Как учитывается</th><th>3. Часы отслеживают?</th><th>4. Вопросы ФНС?</th><th>5. Обратили бы внимание</th><th>Статус</th><th>Заметки</th><th></th></tr>';
-  if(!S.answers.length)h+='<tr><td colspan="11" class="empty">Пока пусто — заносите ответы по мере поступления.</td></tr>';
-  S.answers.forEach(function(a,i){
-   h+='<tr>'
-   +'<td><input data-af="date" data-ai="'+i+'" value="'+esc(a.date||"")+'" placeholder="ГГГГ-ММ-ДД"></td>'
-   +tcella('who',i,a.who)
-   +tcella('src',i,a.src)
-   +tcella('a1',i,a.a1)
-   +tcella('a2',i,a.a2)
-   +tcella('a3',i,a.a3)
-   +tcella('a4',i,a.a4)
-   +tcella('a5',i,a.a5)
-   +'<td><select data-af="status" data-ai="'+i+'">'+selOpts(AST,a.status)+'</select></td>'
-   +tcella('notes',i,a.notes)
-   +'<td><button class="del" data-ax="'+i+'" title="Удалить">✕</button></td></tr>';
-  });
-  h+='</table></div>';
- }else if(tab==="all"){
-  h+='<button class="btn" id="addBtn">＋ Добавить задачу</button><div class="hint">Кнопка «📅 Перенести» сдвигает задачу и все последующие этапы на выбранный срок — план сохраняет структуру.</div>';
-  ["v","p","m","w"].forEach(function(p){
-   h+="<h2>"+PH[p]+"</h2>";
-   TASKS.filter(function(t){return t.ph===p}).forEach(function(t){h+=card(t)});
-  });
-  if(S.extra.length){h+="<h2>Мои задачи</h2>";S.extra.forEach(function(t,i){
-   h+=card({id:"x"+i,date:t.date,title:t.title,desc:t.desc||"",crit:t.crit});
-  });}
- }else if(tab==="docs"){
-  h+="<h2>Библиотека проекта</h2><div class=\"hint\">Все материалы зашиты в этот файл — внешние ссылки не нужны. «Открыть» — посмотреть здесь, «Скачать» — сохранить на диск.</div>";
-  DOCS.forEach(function(d,i){
-   h+='<div class="card"><div class="docname">'+esc(d.name)+"</div><div class=\"docdesc\">"+esc(d.desc)+"</div>"
-   +'<button class="docbtn" data-open="'+i+'">Открыть</button><button class="docbtn alt" data-dl="'+i+'">⬇ Скачать</button></div>';
-  });
- }else{
-  h+="<h2>Журнал: конспекты интервью, инсайты, решения</h2>"
-   +'<textarea id="log">'+esc(S.log)+"</textarea>"
-   +'<button class="btn" id="clearLog">Очистить журнал</button>';
+'use strict';
+const $=s=>document.querySelector(s);
+const MONTHS=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+function addMonths(k,n){const[y,m]=k.split('-').map(Number);let M=m-1+n;const Y=y+Math.floor(M/12);M=((M%12)+12)%12;return Y+'-'+String(M+1).padStart(2,'0');}
+function label(k){const[y,m]=k.split('-').map(Number);return MONTHS[m-1]+' '+String(y).slice(2);}
+function curMonth(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function monthWindow(n){const CM=curMonth();const a=[];for(let i=n-1;i>=0;i--)a.push(addMonths(CM,-i));return a;}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2200);}
+const STATUS={
+ safe:{t:'Безопасно',fg:'#15803d',bg:'#dcfce7'},
+ warn:{t:'Внимание',fg:'#b45309',bg:'#fef3c7'},
+ crit:{t:'На грани',fg:'#b91c1c',bg:'#fee2e2'},
+ triggered:{t:'Лимит сработал',fg:'#991b1b',bg:'#fecaca'},
+ paused:{t:'Пауза 60/6',fg:'#57534e',bg:'#e7e5e4'}};
+function badge(st){const s=STATUS[st];return '<span class="badge" style="color:'+s.fg+';background:'+s.bg+'">'+s.t+'</span>';}
+
+/* ---------- состояние ---------- */
+const KEY='hr60_v1';
+const DEF={limit:60,seriesLen:6,pauseMonths:2};
+let S=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+function seed(){
+ const CM=curMonth(),M=n=>addMonths(CM,n);
+ const mk=(a,b,c,d,e,f,g)=>({[M(-7)]:a||'', [M(-6)]:b||'',[M(-5)]:c||'',[M(-4)]:d||'',[M(-3)]:e||'',[M(-2)]:f||'',[M(-1)]:g||''});
+ S={version:1,settings:{...DEF},journal:[],executors:[
+  {id:uid(),code:'A7K2',name:'Иванов И. И.',phone:'+7 911 100-11-22',platform:'Яндекс Смена · СтройПодряд',payouts:mk(42000,45000,48000,46000,47000,44000,41000),hours:mk(48,66,68,70,65,64,61)},
+  {id:uid(),code:'M3P9',name:'Петрова А. С.',phone:'+7 911 100-33-44',platform:'Авито Подработки · СтройПодряд',payouts:mk(38000,39500,41000,40000,40500,39000,38500),hours:mk(30,55,63,65,64,66,62)},
+  {id:uid(),code:'K4T8',name:'Козлова М. В.',phone:'+7 911 100-55-66',platform:'КлинингПро · Клининг',payouts:mk(28000,31000,30000,12000,22000,26000,25000),hours:mk(52,64,66,61,40,62,60)},
+  {id:uid(),code:'D1R6',name:'Сидоров П. Н.',phone:'+7 911 100-77-88',platform:'Яндекс Смена · Склад №2',payouts:mk(21000,22000,23000,21000,24000,22000,23000),hours:mk(44,50,48,52,55,50,54)},
+  {id:uid(),code:'V8L2',name:'Кузнецов Д. А.',phone:'+7 911 100-99-00',platform:'Доставка Еда · Общепит',payouts:mk(18000,19000,25000,27000,26000,25500,26500),hours:mk(38,40,66,70,64,71,0)} ],
+  journal:[{ts:new Date().toISOString(),txt:'Загружены демо-данные (5 исполнителей)'}]};
+ save();}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;}if(!S||!S.executors)seed();}
+function jlog(txt){S.journal.unshift({ts:new Date().toISOString(),txt});if(S.journal.length>200)S.journal.length=200;save();}
+
+/* ---------- расчётное ядро 60/6 ---------- */
+function calcLink(ex){
+ const Sx=S.settings;
+ const months=Object.keys(ex.hours||{}).sort();
+ const r={series:0,status:'safe',triggerMonth:null,pausedUntil:null,resetMonth:null,forecast:null};
+ if(!months.length)return r;
+ let series=0,pauseUntil=null,triggeredMonth=null;
+ for(const m of months){
+  if(pauseUntil){if(m<=pauseUntil)continue;pauseUntil=null;series=0;}
+  const h=+ex.hours[m]||0;
+  if(h>Sx.limit){series++;
+   if(series>=Sx.seriesLen){triggeredMonth=m;pauseUntil=addMonths(m,Sx.pauseMonths);series=0;}
+  }else{series=0;r.resetMonth=m;}
  }
- m.innerHTML=h;
- var ab=document.getElementById("addBtn");
- if(ab)ab.onclick=function(){
-  var t1=prompt("Название задачи:");if(!t1)return;
-  var t2=prompt("Дата (ГГГГ-ММ-ДД):");if(!t2)return;
-  var t3=prompt("Критерий выполнения:");if(!t3)return;
-  var n=S.extra.length;
-  S.extra.push({date:t2,title:t1,crit:t3,desc:""});
-  S["d"+"x"+n]=false;S["r"+"x"+n]="";
-  save();render();
- };
- var cl=document.getElementById("clearLog");
- if(cl)cl.onclick=function(){if(confirm("Очистить журнал?")){S.log="";save();render()}};
- var as=document.getElementById("addS");
- if(as)as.onclick=function(){S.communities.push({status:"вступил"});save();render()};
- var csx=document.getElementById("csvS");
- if(csx)csx.onclick=csvCommunities;
- var ac=document.getElementById("addC");
- if(ac)ac.onclick=function(){S.contacts.push({status:"новый"});save();render()};
- var ccx=document.getElementById("csvC");
- if(ccx)ccx.onclick=csvContacts;
- var aa=document.getElementById("addA");
- if(aa)aa.onclick=function(){S.answers.push({});save();render()};
- var cax=document.getElementById("csvA");
- if(cax)cax.onclick=csvAnswers;
- document.querySelectorAll("[data-open]").forEach(function(b){b.onclick=function(){openDoc(+b.dataset.open)}});
- document.querySelectorAll("[data-dl]").forEach(function(b){b.onclick=function(){dlDoc(+b.dataset.dl)}});
- document.querySelectorAll("[data-postpone]").forEach(function(b){b.onclick=function(){post(b.dataset.postpone)}});
- document.querySelectorAll("[data-sx]").forEach(function(b){b.onclick=function(){S.communities.splice(+b.dataset.sx,1);save();render()}});
- document.querySelectorAll("[data-cx]").forEach(function(b){b.onclick=function(){S.contacts.splice(+b.dataset.cx,1);save();render()}});
- document.querySelectorAll("[data-ax]").forEach(function(b){b.onclick=function(){S.answers.splice(+b.dataset.ax,1);save();render()}});
-}
-function post(id){
- id=String(id);
- var t=null;
- for(var i=0;i<TASKS.length;i++){if(String(TASKS[i].id)===id){t=TASKS[i];break}}
- if(!t){S.extra.forEach(function(x,j){if("x"+j===id){t=x}})}
- if(!t)return;
- var ans=prompt("Перенести «"+t.title+"» на сколько дней?\nВсе последующие этапы сдвинутся на столько же.\nНапример: 1, 2, 3 или 7","1");
- if(ans===null)return;
- var d=parseInt(ans,10);
- if(!d||d<=0)return;
- var base=pd(t.date);
- S.dates[id]=iso(new Date(base.getFullYear(),base.getMonth(),base.getDate()+d));
- TASKS.forEach(function(x){
-  if(String(x.id)!==id&&pd(x.date)>=base){
-   var cur=S.dates[x.id]?pd(S.dates[x.id]):pd(x.date);
-   S.dates[x.id]=iso(new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+d));
-  }
- });
- S.extra.forEach(function(x,j){
-  var key="x"+j;
-  if(key!==id&&pd(x.date)>=base){
-   var cur2=S.dates[key]?pd(S.dates[key]):pd(x.date);
-   S.dates[key]=iso(new Date(cur2.getFullYear(),cur2.getMonth(),cur2.getDate()+d));
-  }
- });
- save();render();
-}
-function openDoc(i){
- curDoc=DOCS[i];
- document.getElementById("ovt").textContent=curDoc.name;
- document.getElementById("ovp").textContent=curDoc.type==="html"?"Это рабочий HTML-файл — код не показываю целиком, чтобы не мешать глазу. Нажмите «Скачать файл», сохраните и откройте в браузере.":curDoc.body;
- document.getElementById("ovd").style.display="inline-block";
- document.getElementById("ov").style.display="block";
-}
-function saveDoc(d){
- var mime=d.type==="html"?"text/html":"text/markdown";
- var b=new Blob([d.body],{type:mime+";charset=utf-8"});
- var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=d.file;a.click();
-}
-document.getElementById("ovx").onclick=function(){document.getElementById("ov").style.display="none"};
-document.getElementById("ovd").onclick=function(){if(curDoc)saveDoc(curDoc)};
-document.getElementById("main").addEventListener("input",function(e){
- var t=e.target;if(!t.getAttribute)return;
- var sf=t.getAttribute("data-sf");
- if(sf){var k=+t.getAttribute("data-si");if(S.communities[k])S.communities[k][sf]=t.value;save();return}
- var cf=t.getAttribute("data-cf");
- if(cf){var i=+t.getAttribute("data-ci");if(S.contacts[i])S.contacts[i][cf]=t.value;save();return}
- var af=t.getAttribute("data-af");
- if(af){var j=+t.getAttribute("data-ai");if(S.answers[j])S.answers[j][af]=t.value;save();return}
- var r=t.getAttribute("data-report");
- if(r){S["r"+r]=t.value;save()}
- if(t.id==="log"){S.log=t.value;save()}
-});
-document.getElementById("main").addEventListener("change",function(e){
- var t=e.target;if(!t.getAttribute)return;
- var sf=t.getAttribute("data-sf");
- if(sf){var k=+t.getAttribute("data-si");if(S.communities[k])S.communities[k][sf]=t.value;save();return}
- var cf=t.getAttribute("data-cf");
- if(cf){var i=+t.getAttribute("data-ci");if(S.contacts[i])S.contacts[i][cf]=t.value;save();return}
- var af=t.getAttribute("data-af");
- if(af){var j=+t.getAttribute("data-ai");if(S.answers[j])S.answers[j][af]=t.value;save();return}
- var c=t.getAttribute("data-check");
- if(c){S["d"+c]=t.checked;save();render()}
-});
-document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){tab=b.dataset.tab;render()}});
-function meta(){
- var d=new Date(),days=["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
- var lim=(d.getDay()===0||d.getDay()===6)?"до 4 часов (выходной)":"около 2 часов (будний день)";
- document.getElementById("meta").textContent="Сегодня: "+days[d.getDay()]+", "+fmt(d)+" — лимит на сегодня: "+lim;
-}
-meta();render();
-if(fsOK)initFileLink();else setSv("автосохранение в файл: только Chrome/Edge; здесь работает резерв");
-</script>
+ r.series=series;r.triggerMonth=triggeredMonth;r.pausedUntil=pauseUntil;
+ const cur=months[months.length-1],hcur=+ex.hours[cur]||0;
+ if(pauseUntil){
+  r.status=triggeredMonth===cur?'triggered':'paused';
+  r.forecast='расчёт возобновится с '+label(addMonths(pauseUntil,1));
+ }else if(series>=Sx.seriesLen-1){
+  r.status='crit';r.forecast='при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,1));
+ }else if(series>=Sx.seriesLen-2){
+  r.status='warn';
+  r.forecast=hcur>Sx.limit?('при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,Sx.seriesLen-series)))
+   :('если снова >'+Sx.limit+' ч — сработает в '+label(addMonths(addMonths(cur,1),Sx.seriesLen-1)));
+ }else{
+  r.status='safe';
+  r.forecast=hcur>Sx.limit?('при темпе >'+Sx.limit+' ч сработает в '+label(addMonths(cur,Sx.seriesLen-series))):'риска нет';
+ }
+ return r;}
+function payoutRisk(ex){ // упрощённый индикатор дохода (25 тыс. ₽ × 5 мес подряд)
+ const months=Object.keys(ex.payouts||{}).sort();let s=0,best=0;
+ for(const m of months){const p=+ex.payouts[m]||0;if(p>=25000){s++;if(s>best)best=s;}else s=0;}
+ return best;}
+const RANK={triggered:0,paused:1,crit:2,warn:3,safe:4};
 
+/* ---------- навигация ---------- */
+const TABS=[['dash','Панель'],['execs','Исполнители'],['exec','Страница исполнителя'],['calc','Калькулятор'],['set','Настройки']];
+let tab='dash',openId=null,execCode=null;
+function renderNav(){
+ $('#nav').innerHTML=TABS.map(t=>'<button class="'+(tab===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>').join('');}
+function go(t,arg){tab=t;if(arg!==undefined)openId=arg;renderNav();render();}
+function render(){
+ const v=$('#view');
+ if(tab==='dash')v.innerHTML=viewDash();
+ else if(tab==='execs')v.innerHTML=viewExecs();
+ else if(tab==='exec')v.innerHTML=viewExecPage();
+ else if(tab==='calc')v.innerHTML=viewCalc();
+ else v.innerHTML=viewSet();
+ const h=typeof afterRender==='function'?afterRender:null;afterRender=null;if(h)h();}
+let afterRender=null;
 
-</body></html>
+/* ---------- панель заказчика ---------- */
+function viewDash(){
+ const CM=curMonth();
+ const rows=S.executors.map(ex=>({ex,c:calcLink(ex)}));
+ rows.sort((a,b)=>RANK[a.c.status]-RANK[b.c.status]||b.c.series-a.c.series);
+ const cnt={safe:0,warn:0,crit:0,triggered:0,paused:0};rows.forEach(r=>cnt[r.c.status]++);
+ let alerts='';
+ rows.forEach(r=>{const c=r.c;
+  if(c.status==='crit')alerts+='<div class="alert red"><span class="ic">🚨</span><div><b>'+r.ex.name+'</b> — '+c.series+'-й месяц подряд выше лимита. При текущем темпе приостановка в '+label(addMonths(CM,1))+'. Рекомендация: снизить часы в '+label(CM).replace(' '+CM.slice(2),'')+' или распределить по другому заказчику.</div></div>';
+  if(c.status==='warn')alerts+='<div class="alert yel"><span class="ic">⚠️</span><div><b>'+r.ex.name+'</b> — '+c.series+'-й месяц подряд. '+c.forecast+'. Пора готовить план на '+label(addMonths(CM,1))+'.</div></div>';
+  if(c.status==='triggered')alerts+='<div class="alert red"><span class="ic">⛔</span><div><b>'+r.ex.name+'</b> — лимит сработал в '+label(CM)+'. Пауза 2 месяца, заказы через платформу приостановлены. Варианты: перераспределить объём, оформить ГПД напрямую, взять объём на себя.</div></div>';
+ });
+ const tbl='<table><tr><th>Исполнитель</th><th>Платформа · заказчик</th>'+monthWindow(8).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Серия</th><th>Статус</th><th>Прогноз</th></tr>'
+ +rows.map(r=>{const ex=r.ex,c=r.c;const tds=monthWindow(8).map(m=>{const h=ex.hours[m];const v=(h===''||h==null)?'':(+h>S.settings.limit?'<b style="color:#b91c1c">'+h+'</b>':h);return '<td class="num">'+(v||'–')+'</td>';}).join('');
+  return '<tr style="cursor:pointer" onclick="go(\'execs\',\''+ex.id+'\')"><td><b>'+ex.name+'</b></td><td class="mut">'+ex.platform+'</td>'+tds+'<td class="num"><b>'+c.series+'/'+S.settings.seriesLen+'</b></td><td>'+badge(c.status)+'</td><td class="mut">'+(c.forecast||'—')+'</td></tr>';}).join('')+'</table>';
+ return '<div class="kpis">'
+ +'<div class="kpi"><div class="n">'+S.executors.length+'</div><div class="l">исполнителей</div></div>'
+ +'<div class="kpi"><div class="n" style="color:#b91c1c">'+(cnt.crit+cnt.triggered)+'</div><div class="l">на грани / сработал</div></div>'
+ +'<div class="kpi"><div class="n" style="color:#b45309">'+cnt.warn+'</div><div class="l">на предупреждении</div></div>'
+ +'<div class="kpi"><div class="n" style="color:#15803d">'+cnt.safe+'</div><div class="l">безопасно</div></div></div>'
+ +(alerts||'<div class="card mut">Открытых алертов нет — все счётчики под контролем.</div>')
+ +'<div class="card"><div class="big" style="margin-bottom:8px">Реестр связок · '+label(CM)+'</div>'+tbl+'</div>';
+}
+
+/* ---------- исполнители ---------- */
+function viewExecs(){
+ if(openId){const ex=S.executors.find(e=>e.id===openId);if(ex)return viewDetail(ex);openId=null;}
+ const CM=curMonth();
+ const rows=S.executors.map(ex=>({ex,c:calcLink(ex)})).sort((a,b)=>RANK[a.c.status]-RANK[b.c.status]);
+ const tbl='<table><tr><th>Исполнитель</th><th>Код входа</th><th>Платформа · заказчик</th>'+monthWindow(6).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Статус</th></tr>'
+ +rows.map(r=>{const tds=monthWindow(6).map(m=>'<td class="num"><input type="number" min="0" max="400" value="'+(r.ex.hours[m]??'')+'" onchange="setHours(\''+r.ex.id+'\',\''+m+'\',this.value)"></td>').join('');
+  return '<tr><td><b>'+r.ex.name+'</b><div class="mut">'+r.ex.phone+'</div></td><td><code>'+r.ex.code+'</code></td><td class="mut">'+r.ex.platform+'</td>'+tds+'<td>'+badge(r.c.status)+'</td></tr>';}).join('')+'</table>';
+ return '<div class="hint">Часы можно вводить прямо в таблицу — счётчики и статусы пересчитываются мгновенно. Клик по исполнителю на «Панели» открывает карточку. Код входа исполнитель использует на странице «Исполнитель».</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Табель часов</div>'+tbl+'</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Добавить исполнителя</div>'
+ +'<div class="row"><label class="f">ФИО<input type="text" id="nName" placeholder="Иванов И. И."></label>'
+ +'<label class="f">Телефон<input type="tel" id="nPhone" placeholder="+7 900 000-00-00"></label>'
+ +'<label class="f">Платформа · заказчик<input type="text" id="nPlat" placeholder="Яндекс Смена · СтройПодряд"></label>'
+ +'<button class="btn p" onclick="addExec()">Добавить</button></div></div>';
+}
+function setHours(id,m,v){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ if(v===''||v==null){delete ex.hours[m];}else ex.hours[m]=+v;
+ jlog(ex.name+': часы '+label(m)+' = '+(v||'0')+' (введено заказчиком)');save();render();}
+function addExec(){
+ const n=$('#nName').value.trim(),p=$('#nPhone').value.trim(),pl=$('#nPlat').value.trim()||'без платформы';
+ if(!n){toast('Укажите имя исполнителя');return;}
+ S.executors.push({id:uid(),code:uid().slice(0,4),name:n,phone:p,platform:pl,payouts:{},hours:{}});
+ jlog('Добавлен исполнитель '+n);save();render();toast('Исполнитель добавлен');}
+function viewDetail(ex){
+ const c=calcLink(ex),CM=curMonth();
+ const months=monthWindow(8);
+ const maxH=Math.max(80,...months.map(m=>+ex.hours[m]||0));
+ const bars=months.map(m=>{const h=+ex.hours[m]||0;const over=h>S.settings.limit;
+  return '<div><div class="c">'+(h||'–')+'</div><div class="b'+(over?' over':'')+'" style="height:'+Math.round(h/maxH*100)+'%"></div><div class="c">'+label(m)+'</div></div>';}).join('');
+ const pr=payoutRisk(ex);
+ const jr=S.journal.filter(j=>j.txt.indexOf(ex.name)>=0).slice(0,8).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU').slice(0,16)+' — '+j.txt+'</div>').join('')||'<div class="mut">записей нет</div>';
+ const pay=months.map(m=>'<div style="text-align:center"><div class="mut" style="font-size:11px">'+label(m)+'</div><input type="number" min="0" step="500" style="width:70px" value="'+(ex.payouts[m]??'')+'" onchange="setPay(\''+ex.id+'\',\''+m+'\',this.value)"></div>').join('');
+ return '<button class="btn g noprint" onclick="go(\'execs\')">← К списку</button> <button class="btn s noprint" onclick="window.print()">🖨 Досье в PDF (печать)</button><br><br>'
+ +'<div class="card"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="big">'+ex.name+'</div>'+badge(c.status)
+ +'<div class="mut">'+ex.platform+' · '+ex.phone+' · код <code>'+ex.code+'</code></div></div>'
+ +'<div class="bar" style="margin-top:14px">'+bars+'</div>'
+ +'<div><b>Серия: '+c.series+'/'+S.settings.seriesLen+'.</b> '+(c.forecast||'')+'</div>'
+ +(c.resetMonth?'<div class="mut">Серия сбрасывалась в '+label(c.resetMonth)+' (месяц ≤ '+S.settings.limit+' ч).</div>':'')
+ +(c.pausedUntil?'<div class="mut">Пауза действует до конца '+label(c.pausedUntil)+'.</div>':'')
+ +'</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:8px">Выплаты по месяцам, ₽</div><div class="row">'+pay+'</div>'
+ +(pr>=4?'<div class="alert yel" style="margin-top:10px"><span class="ic">📊</span><div>Индикатор дохода (приказ 657н): '+pr+' месяцев подряд выплаты ≥ 25 000 ₽. При 5 месяцах подряд — риск признания трудовых отношений. Держите месяц ниже порога или готовьте документы ГПХ.</div></div>':'')
+ +'</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:8px">Журнал действий (досье осмотрительности)</div>'+jr+'</div>';
+}
+function setPay(id,m,v){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ if(v===''||v==null){delete ex.payouts[m];}else ex.payouts[m]=+v;jlog(ex.name+': выплата '+label(m)+' = '+(v||'0')+' ₽');save();render();}
+
+/* ---------- страница исполнителя ---------- */
+function viewExecPage(){
+ if(!execCode)return '<div class="phone"><div class="ph-head">⏰ Часовой лимит</div><div class="ph-body">'
+ +'<p>Введите код из приглашения вашего заказчика (или ссылку вида hr60.ru/i/<b>A7K2</b> — просто код).</p>'
+ +'<div class="row"><input type="text" id="code" placeholder="Например, A7K2" style="flex:1;min-width:120px"><button class="btn p" onclick="enterCode()">Войти</button></div>'
+ +'<p class="mut" style="margin-top:14px">Вход по номеру телефона не нужен: код выдаёт ваш заказчик. Данные видите только вы и он.</p></div></div>';
+ const ex=S.executors.find(e=>e.code===execCode.toUpperCase());
+ if(!ex){execCode=null;const v=viewExecPage();afterRender=()=>toast('Код не найден, попробуйте ещё раз');return v;}
+ const c=calcLink(ex),CM=curMonth();
+ const links=ex.platform.split('·').map(s=>s.trim());
+ const hoursCur=ex.hours[CM];
+ const advice={safe:'Всё под контролем. Если в этом месяце часов больше '+S.settings.limit+', следите за счётчиком.',
+  warn:'Вы на '+c.series+'-м месяце подряд выше лимита. В декабре можно снизить нагрузку — один месяц до '+S.settings.limit+' ч сбрасывает счётчик.',
+  crit:'Внимание: это '+c.series+'-й месяц подряд выше лимита. Если в декабре снова больше '+S.settings.limit+' ч — заказы от платформы приостановят на 2 месяца. Снизьте часы или предупредите заказчика.',
+  triggered:'Лимит сработал. Заказы через платформу приостановлены на 2 месяца. Обсудите с заказчиком ГПД или другой формат работы.',
+  paused:'Идёт пауза после срабатывания лимита. '+c.forecast+'.'};
+ return '<div class="phone"><div class="ph-head">⏰ Часовой лимит · '+ex.name.split(' ')[0]+'</div><div class="ph-body">'
+ +'<button class="btn g" style="width:100%;margin-bottom:12px" onclick="exitCode()">Выйти</button>'
+ +'<div style="text-align:center;margin:8px 0">'+badge(c.status)+'</div>'
+ +'<div style="text-align:center" class="mut">'+ex.platform+'</div>'
+ +'<div style="text-align:center;margin:14px 0"><span class="big" style="font-size:44px">'+(c.series)+'</span><span class="mut"> / '+S.settings.seriesLen+' месяцев</span></div>'
+ +'<div class="hint" style="margin-bottom:14px">'+advice[c.status]+'</div>'
+ +'<label class="f">Часы за '+label(CM)+' у «'+(links[1]||links[0])+'»'
+ +'<input type="number" min="0" max="400" value="'+(hoursCur??'')+'" id="execHours" style="width:100%;font-size:18px;text-align:center" placeholder="0"></label>'
+ +'<button class="btn p" style="width:100%;margin-top:10px" onclick="saveExecHours(\''+ex.id+'\')">Отправить</button>'
+ +(hoursCur!=null?'<p class="mut" style="margin-top:10px">Отправлено: '+hoursCur+' ч. Можно исправить до конца месяца.</p>':'')
+ +'<p class="mut" style="margin-top:16px">Напоминание придёт SMS или пуши в начале каждого месяца. Отписаться: СТОП.</p>'
+ +'</div></div>';
+}
+function enterCode(){const v=$('#code').value.trim();if(!v)return;execCode=v.toUpperCase();render();}
+function exitCode(){execCode=null;render();}
+function saveExecHours(id){const ex=S.executors.find(e=>e.id===id);const v=+$('#execHours').value||0;
+ ex.hours[curMonth()]=v;jlog(ex.name+': часы '+label(curMonth())+' = '+v+' (введено исполнителем)');save();render();toast('Сохранено');}
+
+/* ---------- калькулятор ---------- */
+function viewCalc(){
+ const CM=curMonth(),ms=monthWindow(6);
+ const inputs=ms.map(m=>'<label class="f">'+label(m)+'<input type="number" id="c_'+m+'" min="0" max="400" placeholder="часы" style="width:90px"></label>').join('');
+ return '<div class="hint">Публичный лид-магнит: самозанятый вводит свои часы по месяцам и узнаёт, когда сработает лимит. Внизу — перехват для заказчиков.</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Когда у меня сработает лимит 60/6?</div>'
+ +'<div class="row">'+inputs+'</div>'
+ +'<button class="btn p" style="margin-top:14px" onclick="calcPub()">Рассчитать</button>'
+ +'<div id="calcRes" style="margin-top:14px"></div></div>';
+}
+function calcPub(){
+ const ms=monthWindow(6),ex={hours:{}};
+ ms.forEach(m=>{const v=$('#c_'+m).value;if(v!=='')ex.hours[m]=+v;});
+ if(!Object.keys(ex.hours).length){toast('Введите часы хотя бы за один месяц');return;}
+ const c=calcLink(ex);
+ const a={safe:['✅','Лимит не угрожает.'],warn:['⚠️','Вы на '+c.series+'-м месяце подряд выше лимита. '],crit:['🚨','Срочно: '+c.series+'-й месяц подряд выше лимита. '],triggered:['⛔','Лимит сработал — платформа приостановит заказы на 2 месяца. '],paused:['⏸','Идёт пауза после срабатывания. ']};
+ let cls={safe:'yel',warn:'yel',crit:'red',triggered:'red',paused:'yel'}[c.status];
+ let out='<div class="alert '+cls+'"><span class="ic">'+a[c.status][0]+'</span><div><b>'+a[c.status][1]+'</b> '+(c.forecast?c.forecast.charAt(0).toUpperCase()+c.forecast.slice(1)+'.':'')+'<br>Один месяц с ≤ '+S.settings.limit+' часами сбрасывает счётчик на ноль.<br><br><b>Вы заказчик?</b> Нужна панель по всем исполнителям сразу — напишите нам, подключим пилот бесплатно.</div></div>';
+ $('#calcRes').innerHTML=out;jlog('Калькулятор: расчёт для '+c.series+'/'+S.settings.seriesLen+' ('+c.status+')');}
+
+/* ---------- настройки ---------- */
+function viewSet(){
+ return '<div class="hint">Параметры расчёта соответствуют постановлению № 760 (лимит 60 часов, серия 6 месяцев подряд, пауза 2 месяца). Для пилотов менять не нужно — но сервис позволяет.</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Параметры лимита</div><div class="row">'
+ +'<label class="f">Лимит часов в месяц<input type="number" id="sLim" value="'+S.settings.limit+'" style="width:90px"></label>'
+ +'<label class="f">Длина серии, мес<input type="number" id="sLen" value="'+S.settings.seriesLen+'" style="width:90px"></label>'
+ +'<label class="f">Пауза после срабатывания, мес<input type="number" id="sPause" value="'+S.settings.pauseMonths+'" style="width:90px"></label>'
+ +'<button class="btn p" onclick="saveSet()">Сохранить</button></div></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Данные</div>'
+ +'<button class="btn s" onclick="exportCSV()">⬇ Экспорт CSV (для 1С / Excel)</button> '
+ +'<button class="btn g" onclick="if(confirm(\'Сбросить всё к демо-данным?\')){seed();render();toast(\'Демо-данные восстановлены\')}">Сбросить к демо</button></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Журнал</div>'
+ +S.journal.slice(0,15).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU')+' — '+j.txt+'</div>').join('')+'</div>';
+}
+function saveSet(){S.settings.limit=+$('#sLim').value||60;S.settings.seriesLen=+$('#sLen').value||6;S.settings.pauseMonths=+$('#sPause').value||2;jlog('Изменены параметры расчёта');save();render();toast('Сохранено');}
+function exportCSV(){
+ const head=['Исполнитель','Телефон','Платформа · заказчик','Код'].concat(monthWindow(8).map(label),['Серия','Статус','Прогноз']);
+ const rows=S.executors.map(ex=>{const c=calcLink(ex);
+  return [ex.name,ex.phone,ex.platform,ex.code].concat(monthWindow(8).map(m=>ex.hours[m]??''),[c.series+'/'+S.settings.seriesLen,STATUS[c.status].t,c.forecast||'']);});
+ const csv='\ufeff'+[head,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hr60_'+curMonth()+'.csv';a.click();
+ jlog('Экспорт CSV реестра');}
+
+/* ---------- старт ---------- */
+load();renderNav();render();
+</script></body></html>
