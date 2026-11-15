@@ -101,7 +101,7 @@ code{background:#f1f5f9;padding:2px 7px;border-radius:6px;font-size:.92em}
 /* ---------- QR-модалка ---------- */
 .qr-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .qr-box{background:#fff;border-radius:16px;padding:20px;max-width:330px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(15,23,42,.3)}
-.qr-box img{width:220px;height:220px;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#fff}
+.qr-box img{width:240px;height:240px;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#fff}
 </style></head><body>
 <header><span class="logo">Норма<span class="dot">.</span></span> <span class="tag606">счётчик 60/6</span> <span class="demo">демо-данные</span>
 <span class="note">данные хранятся локально в этом браузере</span></header>
@@ -140,7 +140,12 @@ function fallback(t,done){const ta=document.createElement('textarea');ta.value=t
 function copyInvite(ex){copyText(inviteMsg(ex),'Приглашение скопировано — вставьте в переписку');jlog(ex.name+': текст приглашения скопирован');}
 function openWA(ex){window.open('https://wa.me/?text='+encodeURIComponent(inviteMsg(ex)),'_blank');jlog(ex.name+': приглашение отправлено через WhatsApp');}
 function openTG(ex){window.open('https://t.me/share/url?url='+encodeURIComponent(inviteLink(ex))+'&text='+encodeURIComponent('Приглашение в «Норма» · ваш код: '+ex.code),'_blank');jlog(ex.name+': приглашение отправлено через Telegram');}
-function openMAX(ex){window.open('https://max.ru/:share?text='+encodeURIComponent(inviteMsg(ex)),'_blank');jlog(ex.name+': приглашение отправлено через MAX');}
+async function shareInvite(ex){
+ const msg=inviteMsg(ex);
+ if(navigator.share){try{await navigator.share({title:'Норма · счётчик 60/6',text:msg});jlog(ex.name+': приглашение отправлено через системное меню');return;}catch(e){if(e&&e.name==='AbortError')return;}}
+ copyText(msg,'Меню не открылось — приглашение скопировано в буфер');
+}
+
 
 /* ---------- QR-код ---------- */
 function closeQR(){const e=document.getElementById('qrOv');if(e)e.remove();}
@@ -208,7 +213,7 @@ function calcLink(ex){
 function payoutRisk(ex){
  const months=Object.keys(ex.payouts||{}).sort();let s=0,best=0;
  for(const m of months){const p=+ex.payouts[m]||0;if(p>=25000){s++;if(s>best)best=s;}else s=0;}
- return best;}
+ return {series:best,former:!!ex.formerEmp};}
 function remainTxt(ex){
  const CM=curMonth();if(ex.hours[CM]==null||ex.hours[CM]==='')return null;
  const h=+ex.hours[CM]||0,left=S.settings.limit-h;
@@ -244,6 +249,7 @@ function viewDash(){
   if(c.status==='warn')alerts+='<div class="alert yel"><span class="ic">⚠️</span><div><b>'+r.ex.name+'</b> — '+c.series+'-й месяц подряд. '+c.forecast+'. Пора готовить план на '+label(addMonths(CM,1))+'.</div></div>';
   if(c.status==='triggered')alerts+='<div class="alert red"><span class="ic">⛔</span><div><b>'+r.ex.name+'</b> — лимит сработал в '+label(CM)+'. Пауза 2 месяца, заказы через платформу приостановлены. Варианты: перераспределить объём, оформить ГПД напрямую, взять объём на себя.</div></div>';
   if(r.ex.suspended&&c.status!=='triggered'&&c.status!=='paused')alerts+='<div class="alert yel"><span class="ic">⛔</span><div><b>'+r.ex.name+'</b> — отмечена фактическая приостановка платформой (вручную). Расчётный статус: '+STATUS[c.status].t+'.</div></div>';
+  if(r.ex.formerEmp&&Object.values(r.ex.payouts||{}).some(p=>+p>=25000))alerts+='<div class="alert red"><span class="ic">⚖️</span><div><b>'+r.ex.name+'</b> — индикатор 657н: бывший работник с выплатами ≥ 25 000 ₽. Проверьте структуру договора.</div></div>';
  });
  const tbl='<table><tr><th>Исполнитель</th><th>Платформа · заказчик</th>'+monthWindow(8).map(m=>'<th class="num">'+label(m)+'</th>').join('')+'<th>Серия</th><th>Статус</th><th>Прогноз</th></tr>'
  +rows.map(r=>{const ex=r.ex,c=r.c;const tds=monthWindow(8).map(m=>{const h=ex.hours[m];const v=(h===''||h==null)?'':(+h>S.settings.limit?'<b style="color:#b91c1c">'+h+'</b>':h);return '<td class="num">'+(v||'–')+'</td>';}).join('');
@@ -289,8 +295,11 @@ function addExec(){
  jlog('Добавлен исполнитель '+n);save();render();toast('Исполнитель добавлен');}
 function saveExecEdits(id){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
  const n=$('#eName').value.trim();if(!n){toast('Имя не может быть пустым');return;}
- ex.name=n;ex.phone=$('#ePhone').value.trim();ex.platform=$('#ePlat').value.trim()||'без платформы';
- jlog('Исполнитель обновлён: '+ex.name);save();render();toast('Изменения сохранены');}
+  ex.name=n;ex.phone=$('#ePhone').value.trim();ex.platform=$('#ePlat').value.trim()||'без платформы';
+ const wasF=!!ex.formerEmp;ex.formerEmp=$('#eFormer')?$('#eFormer').checked:false;
+ jlog('Исполнитель обновлён: '+ex.name+(ex.formerEmp&&!wasF?' (отмечен: бывший работник — индикатор 657н)':''));
+ save();render();toast('Изменения сохранены');
+ }
 function delExec(id){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
  if(!confirm('Удалить '+ex.name+'? Все его часы, выплаты и журнал исчезнут. Действие необратимо — сначала сделайте резервную копию в «Настройках».'))return;
  S.executors=S.executors.filter(e=>e.id!==id);
@@ -320,18 +329,20 @@ function viewDetail(ex){
  +'<div class="mut" style="margin-bottom:10px">Ссылка самодостаточна: она откроется на любом телефоне, даже там, где «Норму» никогда не открывали. Исполнитель видит только свой счётчик — ваши таблицы он не видит.</div>'
  +'<div class="row"><code style="font-size:16px">'+ex.code+'</code>'
  +'<input type="text" readonly value="'+inviteLink(ex)+'" style="flex:1;min-width:180px;font-size:13px" onclick="this.select()">'
- +'<button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать приглашение</button>'
+ +'<button class="btn p" onclick="shareInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Поделиться</button>'
+ +'<button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать</button>'
  +'<button class="btn g" onclick="openWA(S.executors.find(e=>e.id===\''+ex.id+'\'))">WhatsApp</button>'
  +'<button class="btn g" onclick="openTG(S.executors.find(e=>e.id===\''+ex.id+'\'))">Telegram</button>'
- +'<button class="btn g" onclick="openMAX(S.executors.find(e=>e.id===\''+ex.id+'\'))">MAX</button>'
  +'<button class="btn p" onclick="showQR(S.executors.find(e=>e.id===\''+ex.id+'\'))">QR-код</button></div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:8px">Выплаты по месяцам, ₽</div><div class="row">'+pay+'</div>'
- +(pr>=4?'<div class="alert yel" style="margin-top:10px"><span class="ic">📊</span><div>Индикатор дохода (приказ 657н): '+pr+' месяцев подряд выплаты ≥ 25 000 ₽. При 5 месяцах подряд — риск признания трудовых отношений. Держите месяц ниже порога или готовьте документы ГПХ.</div></div>':'')
+  +(pr.series>=3?'<div class="alert yel" style="margin-top:10px"><span class="ic">📊</span><div><b>Зарплатоподобный паттерн:</b> '+pr.series+' месяцев подряд выплаты ≥ 25 000 ₽. Регулярные выплаты в зарплатные даты — один из признаков ФНС; сам по себе он не переквалифицирует договор, риск оценивается в совокупности с другими признаками (распорядок, трудовая функция, оборудование заказчика).</div></div>':'')
+ +(pr.former&&pr.series>=1?'<div class="alert red" style="margin-top:10px"><span class="ic">⚖️</span><div><b>Индикатор 657н:</b> исполнитель ранее состоял с вами в трудовых отношениях, и выплаты ≥ 25 000 ₽ идут подряд. По приказу Минтруда № 657н (с 16.02.2026) при более чем 10 таких самозанятых налоговая передаёт сведения в межведомственные комиссии — повод для проверки. Подготовьте документы ГПХ до запроса.</div></div>':'')
  +'</div>'
  +'<div class="card noprint"><div class="big" style="margin-bottom:10px">Данные исполнителя</div>'
  +'<div class="row"><label class="f">ФИО<input type="text" id="eName" value="'+ex.name.replace(/"/g,'&quot;')+'"></label>'
  +'<label class="f">Телефон<input type="tel" id="ePhone" value="'+ex.phone.replace(/"/g,'&quot;')+'"></label>'
  +'<label class="f">Платформа · заказчик<input type="text" id="ePlat" value="'+ex.platform.replace(/"/g,'&quot;')+'"></label>'
+  +'<label class="f" style="flex-direction:row;align-items:center;gap:8px;font-weight:600">Бывший работник компании<input type="checkbox" id="eFormer" '+(ex.formerEmp?'checked':'')+' style="width:18px;height:18px"></label>'
  +'<button class="btn p" onclick="saveExecEdits(\''+ex.id+'\')">Сохранить изменения</button>'
  +'<button class="btn d" onclick="delExec(\''+ex.id+'\')">Удалить исполнителя</button></div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:8px">Журнал действий (досье осмотрительности)</div>'+jr+'</div>';
