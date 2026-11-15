@@ -439,9 +439,9 @@ function viewSet(){
  +'<button class="btn d" onclick="if(confirm(\'Сбросить всё к демо-данным?\')){seed();render();toast(\'Демо-данные восстановлены\')}">Сбросить к демо</button></div>'
  +'<div class="mut" style="margin-top:10px">Копия сохраняет всё: исполнителей, часы, выплаты, настройки и журнал. Данные живут в одном браузере — при смене устройства восстановите их из копии.</div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:10px">Журнал</div>'
- +S.journal.slice(0,15).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU')+' — '+j.txt+'</div>').join('')+'</div>';
-  +'<div class="card"><div class="big" style="margin-bottom:8px">Правовая база</div>'
- +'<div class="mut">Постановление Правительства РФ № 760 от 19.06.2026 — часовой лимит 60/6 и приостановка заказов (действует с 01.10.2026). · Приказ Минтруда № 657н от 19.11.2025 — передача сведений о бывших работниках-самозанятых (с 16.02.2026). · Приказ Минтруда № 685н от 08.12.2025 — индикаторы риска для проверок Роструда (с 10.01.2026). · Федеральный закон № 422-ФЗ, пп. 8 п. 2 ст. 6 — запрет на работу с бывшим работодателем в течение 2 лет. Панель не является юридической консультацией; при спорных ситуациях сверяйтесь с действующими редакциями документов.</div></div>'
+ +S.journal.slice(0,15).map(j=>'<div class="jr">'+new Date(j.ts).toLocaleString('ru-RU')+' — '+j.txt+'</div>').join('')+'</div>'
+ +'<div class="card"><div class="big" style="margin-bottom:8px">Правовая база</div>'
+ +'<div class="mut">Постановление Правительства РФ № 760 от 19.06.2026 — часовой лимит 60/6 и приостановка заказов (действует с 01.10.2026). · Приказ Минтруда № 657н от 19.11.2025 — передача сведений о бывших работниках-самозанятых (с 16.02.2026). · Приказ Минтруда № 685н от 08.12.2025 — индикаторы риска для проверок Роструда (с 10.01.2026). · Федеральный закон № 422-ФЗ, пп. 8 п. 2 ст. 6 — запрет на работу с бывшим работодателем в течение 2 лет. Панель не является юридической консультацией; при спорных ситуациях сверяйтесь с действующими редакциями документов.</div></div>';
 }
 function saveSet(){S.settings.limit=+$('#sLim').value||60;S.settings.seriesLen=+$('#sLen').value||6;S.settings.pauseMonths=+$('#sPause').value||2;jlog('Изменены параметры расчёта');save();render();toast('Сохранено');}
 function exportCSV(){
@@ -498,4 +498,46 @@ renderNav();render();
  if(v){new MutationObserver(wrap).observe(v,{childList:true,subtree:true});wrap();}
 })();
 </script>
+<script>
+/* ---------- обратная связь ---------- */
+const FB_MAX='https://max.ru/u/f9LHodD0cOI9psC0RdXXMaSz_1m5dDL3GrmAiibA_t9dOzafM80gX6DqKeY';
+const FB_TG='https://t.me/LeadingSpec?text=';
+const FB_WA='https://wa.me/79219279822?text=';
+const FB_MAIL='efimovas47@yandex.ru';
+function closeFb(){const e=document.getElementById('fbOv');if(e)e.remove();}
+function openFb(){
+ closeFb();
+ const ov=document.createElement('div');ov.id='fbOv';ov.className='qr-ov';
+ ov.onclick=function(e){if(e.target===ov)closeFb();};
+ ov.innerHTML='<div class="qr-box" style="text-align:left"><div class="big">Отзыв о «Норма»</div>'
+ +'<div class="mut" style="margin:6px 0 10px">Что удобно, что бесит, чего не хватает — это пойдёт в доработку пилота.</div>'
+ +'<textarea id="fbTxt" rows="4" placeholder="Ваш отзыв или вопрос…" style="width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;resize:vertical"></textarea>'
+ +'<div class="row" style="margin-top:12px">'
+ +'<button class="btn p" onclick="sendFb(\'max\')">Max</button>'
+ +'<button class="btn s" onclick="sendFb(\'tg\')">Telegram</button>'
+ +'<button class="btn s" onclick="sendFb(\'wa\')">WhatsApp</button>'
+ +'<button class="btn s" onclick="sendFb(\'mail\')">Почта</button>'
+ +'<button class="btn g" onclick="sendFb(\'copy\')">Скопировать</button></div></div>';
+ document.body.appendChild(ov);
+}
+function sendFb(ch){
+ const t=$('#fbTxt').value.trim();
+ const msg='Отзыв о «Норма» (счётчик 60/6):\n'+(t||'—');
+ if(ch==='copy'){copyText(msg,'Отзыв скопирован — отправьте любым способом');closeFb();return;}
+ if(ch==='mail'){window.open('mailto:'+FB_MAIL+'?subject='+encodeURIComponent('Отзыв о «Норма»')+'&body='+encodeURIComponent(msg),'_blank');closeFb();return;}
+ if(ch==='tg'||ch==='wa'){window.open((ch==='tg'?FB_TG:FB_WA)+encodeURIComponent(msg),'_blank');closeFb();return;}
+ /* MAX не поддерживает предзаполнение текста — копируем отзыв и открываем профиль */
+ copyText(msg,'Текст отзыва скопирован — вставьте его в чат Max');
+ window.open(FB_MAX,'_blank');
+ closeFb();
+}
+(function(){
+ const b=document.createElement('button');b.id='fbBtn';b.textContent='💬 Отзыв';b.onclick=openFb;
+ document.body.appendChild(b);
+})();
+</script>
+<style>
+#fbBtn{position:fixed;right:14px;bottom:14px;z-index:40;border:1px solid #c7d2fe;background:#fff;color:#4f46e5;border-radius:99px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 14px rgba(15,23,42,.06)}
+#fbBtn:hover{background:#eef2ff}
+</style>
 </body></html>
