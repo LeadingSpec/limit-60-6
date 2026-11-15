@@ -124,8 +124,15 @@ const STATUS={
 function badge(st){const s=STATUS[st];return '<span class="badge" style="color:'+s.fg+';background:'+s.bg+'">'+s.t+'</span>';}
 function suspMark(ex){return ex.suspended?' <span class="badge" style="color:#991b1b;background:#fee2e2" title="Фактическая приостановка отмечена вручную">факт: пауза</span>':'';}
 
-/* ---------- приглашения ---------- */
-function inviteLink(ex){return location.origin+location.pathname+'#'+ex.code;}
+/* ---------- приглашения (самодостаточная ссылка со снимком профиля) ---------- */
+function encPayload(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function decPayload(s){try{let t=s.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';return JSON.parse(decodeURIComponent(escape(atob(t))));}catch(e){return null;}}
+function inviteLink(ex){
+ const months=monthWindow(8);
+ const payload={v:2,c:ex.code,n:ex.name,t:ex.phone||'',p:ex.platform||'',s:!!ex.suspended,h:{},py:{}};
+ months.forEach(m=>{if(ex.hours[m]!=null&&ex.hours[m]!=='')payload.h[m]=+ex.hours[m];});
+ months.forEach(m=>{if(ex.payouts[m]!=null&&ex.payouts[m]!=='')payload.py[m]=+ex.payouts[m];});
+ return location.origin+location.pathname+'#p='+encPayload(payload);}
 function inviteMsg(ex){return 'Приглашение в «Норма» — счётчик часов 60/6 для самозанятых.\n\nВаш заказчик добавил вас в панель. Откройте ссылку — она сразу покажет ваш счётчик:\n'+inviteLink(ex)+'\n\nИли на странице «Исполнитель» введите код: '+ex.code;}
 function copyText(t,ok){const done=()=>toast(ok||'Скопировано');
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(()=>fallback(t,done));}else fallback(t,done);}
@@ -143,7 +150,7 @@ function showQR(ex){
  ov.onclick=function(e){if(e.target===ov)closeQR();};
  ov.innerHTML='<div class="qr-box"><div class="big">QR-код приглашения</div>'
  +'<div class="mut">'+ex.name+' · код '+ex.code+'</div>'
- +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data='+encodeURIComponent(inviteLink(ex))+'" alt="QR-код">'
+ +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=6&data='+encodeURIComponent(inviteLink(ex))+'" alt="QR-код">'
  +'<div class="mut" style="margin-top:8px">Наведите камеру телефона — откроется персональный счётчик. Картинку можно сохранить: удерживайте палец и выберите «Сохранить».</div>'
  +'<div class="row" style="justify-content:center;margin-top:14px"><button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать приглашение</button><button class="btn g" onclick="closeQR()">Закрыть</button></div></div>';
  document.body.appendChild(ov);
@@ -202,7 +209,7 @@ function payoutRisk(ex){
  const months=Object.keys(ex.payouts||{}).sort();let s=0,best=0;
  for(const m of months){const p=+ex.payouts[m]||0;if(p>=25000){s++;if(s>best)best=s;}else s=0;}
  return best;}
-function remainTxt(ex){ // «осталось до лимита» в текущем месяце
+function remainTxt(ex){
  const CM=curMonth();if(ex.hours[CM]==null||ex.hours[CM]==='')return null;
  const h=+ex.hours[CM]||0,left=S.settings.limit-h;
  return left>=0?('Израсходовано '+h+' ч — до лимита осталось '+left+' ч.')
@@ -268,8 +275,8 @@ function viewExecs(){
  +'<button class="btn p" onclick="addExec()">Добавить</button></div></div>';
 }
 function filterExecs(v){v=v.trim().toLowerCase();
- document.querySelectorAll('#execTbl tbody tr,#execTbl tr[data-s]').forEach(function(r){
-  if(!r.dataset||!r.dataset.s)return;r.style.display=(!v||r.dataset.s.indexOf(v)>=0)?'':'none';});}
+ document.querySelectorAll('#execTbl tr[data-s]').forEach(function(r){
+  r.style.display=(!v||r.dataset.s.indexOf(v)>=0)?'':'none';});}
 function setHours(id,m,v){const ex=S.executors.find(e=>e.id===id);if(!ex)return;
  if(v===''||v==null){delete ex.hours[m];}else ex.hours[m]=+v;
  jlog(ex.name+': часы '+label(m)+' = '+(v||'0')+' (введено заказчиком)');save();render();
@@ -310,7 +317,7 @@ function viewDetail(ex){
  +'<button class="btn '+(ex.suspended?'g':'s')+' noprint" style="margin-top:10px" onclick="toggleSusp(\''+ex.id+'\')">'+(ex.suspended?'Снять отметку «приостановлен»':'Отметить: платформа приостановила')+'</button>'
  +'</div>'
  +'<div class="card noprint"><div class="big" style="margin-bottom:8px">Пригласить исполнителя</div>'
- +'<div class="mut" style="margin-bottom:10px">Ссылка и код персональные. Исполнитель открывает её на телефоне и видит только свой счётчик — ваши таблицы он не видит.</div>'
+ +'<div class="mut" style="margin-bottom:10px">Ссылка самодостаточна: она откроется на любом телефоне, даже там, где «Норму» никогда не открывали. Исполнитель видит только свой счётчик — ваши таблицы он не видит.</div>'
  +'<div class="row"><code style="font-size:16px">'+ex.code+'</code>'
  +'<input type="text" readonly value="'+inviteLink(ex)+'" style="flex:1;min-width:180px;font-size:13px" onclick="this.select()">'
  +'<button class="btn s" onclick="copyInvite(S.executors.find(e=>e.id===\''+ex.id+'\'))">Копировать приглашение</button>'
@@ -441,10 +448,27 @@ function importJSON(inp){const f=inp.files&&inp.files[0];if(!f)return;
   S=d;jlog('Восстановлено из резервной копии ('+S.executors.length+' исполнителей)');save();render();toast('Данные восстановлены');inp.value='';};
  r.readAsText(f);}
 
-/* ---------- старт ---------- */
+/* ---------- старт: разбор ссылки ---------- */
 load();
-(function(){const h=(location.hash||'').replace('#','').trim().toUpperCase();
- if(h&&S.executors.some(e=>e.code===h)){execCode=h;tab='exec';}})();
+(function(){
+ const h=(location.hash||'').replace(/^#/,'').trim();
+ if(!h)return;
+ if(h.indexOf('p=')===0){
+  const d=decPayload(h.slice(2));
+  if(d&&d.c){
+   const code=String(d.c).toUpperCase();
+   let ex=S.executors.find(e=>e.code===code);
+   if(!ex){
+    ex={id:uid(),code:code,name:d.n||'Исполнитель',phone:d.t||'',platform:d.p||'без платформы',suspended:!!d.s,payouts:d.py||{},hours:d.h||{},guest:true};
+    S.executors.push(ex);
+    jlog('Исполнитель добавлен по пригласительной ссылке: '+ex.name);save();
+   }
+   execCode=code;tab='exec';return;
+  }
+ }
+ const code=h.toUpperCase();
+ if(S.executors.some(e=>e.code===code)){execCode=code;tab='exec';}
+})();
 renderNav();render();
 </script><script>
 /* ---------- обёртка таблиц для горизонтальной прокрутки ---------- */
