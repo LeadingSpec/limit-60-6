@@ -103,9 +103,13 @@ code{background:#f1f5f9;padding:2px 7px;border-radius:6px;font-size:.92em}
 .qr-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .qr-box{background:#fff;border-radius:16px;padding:20px;max-width:330px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(15,23,42,.3)}
 .qr-box img{width:240px;height:240px;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#fff}
+
+/* ---------- бейдж копии и ввод даты ---------- */
+#bkBadge{cursor:pointer;background:#fffbeb;border:1px solid #fde68a;color:#b45309;border-radius:99px;padding:3px 12px;font-size:12px;font-weight:700;max-width:360px}
+.termErr{color:var(--bad);font-size:11.5px;font-weight:400}
 </style></head><body>
 <header><span class="logo">Норма<span class="dot">.</span></span> <span class="tag606">счётчик 60/6</span> <span class="demo">демо-данные</span>
-<span class="note">данные хранятся локально в этом браузере</span></header>
+<span class="note">данные хранятся локально в этом браузере</span><span id="bkBadge" style="display:none" onclick=""></span></header>
 <nav id="nav"></nav><main id="view"></main><div id="toast"></div>
 <script>
 'use strict';
@@ -433,7 +437,7 @@ function viewSet(){
  +'<div class="card"><div class="big" style="margin-bottom:10px">Данные и резервная копия</div>'
  +'<div class="row">'
  +'<button class="btn s" onclick="exportCSV()">⬇ Экспорт CSV (для 1С / Excel)</button>'
- +'<button class="btn s" onclick="exportJSON()">⬇ Резервная копия (JSON)</button>'
+ +'<button class="btn s" id="bkExp" onclick="exportJSON()">⬇ Резервная копия (JSON)</button>'
  +'<button class="btn g" onclick="document.getElementById(\'impFile\').click()">⬆ Восстановить из копии</button>'
  +'<input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)">'
  +'<button class="btn d" onclick="if(confirm(\'Сбросить всё к демо-данным?\')){seed();render();toast(\'Демо-данные восстановлены\')}">Сбросить к демо</button></div>'
@@ -453,13 +457,15 @@ function exportCSV(){
  jlog('Экспорт CSV реестра');}
 function exportJSON(){
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
- a.download='norma_backup_'+curMonth()+'.json';a.click();jlog('Сохранена резервная копия');toast('Копия скачана');}
+ a.download='norma_backup_'+curMonth()+'.json';a.click();S.lastBackup=Date.now();jlog('Сохранена резервная копия');save();if(typeof updateBackupBadge==='function')updateBackupBadge();toast('Копия скачана');}
 function importJSON(inp){const f=inp.files&&inp.files[0];if(!f)return;
  const r=new FileReader();
  r.onload=function(){let d=null;try{d=JSON.parse(r.result);}catch(e){}
   if(!d||!d.executors||!Array.isArray(d.executors)){toast('Файл не похож на копию «Нормы»');inp.value='';return;}
+  if(d.version&&typeof d.version!=='number'){toast('Файл не похож на копию «Нормы»');inp.value='';return;}
+  if(d.version>1){toast('Копия создана более новой версией панели — обновите страницу и повторите');inp.value='';return;}
   if(!confirm('Восстановить копию от '+new Date(d.journal&&d.journal[0]?d.journal[0].ts:Date.now()).toLocaleDateString('ru-RU')+'? Текущие данные будут заменены ('+S.executors.length+' → '+d.executors.length+' исп.).')){inp.value='';return;}
-  S=d;jlog('Восстановлено из резервной копии ('+S.executors.length+' исполнителей)');save();render();toast('Данные восстановлены');inp.value='';};
+  S=d;if(!S.version)S.version=1;S.lastBackup=Date.now();jlog('Восстановлено из резервной копии ('+S.executors.length+' исполнителей)');save();render();if(typeof updateBackupBadge==='function')updateBackupBadge();toast('Данные восстановлены');inp.value='';};
  r.readAsText(f);}
 
 /* ---------- старт: разбор ссылки ---------- */
@@ -511,9 +517,9 @@ function viewGph(){
  +'<div class="mut" style="margin-top:8px">Приостановка по норме 60/6 грозит только работе через платформы. Но переквалификация ГПХ в трудовой договор — риск для любого заказчика с самозанятыми: индикаторы приказов № 657н и № 685н действуют и на прямые договоры. Предупреждений не будет — только запрос от ФНС, проверка Роструда и доначисление НДФЛ с взносами за весь период.</div></div>'
  +'<div class="card"><div class="big" style="margin-bottom:10px">Три нормы, которые касаются вас</div>'
  +'<table><tr><th>Норма</th><th>Когда</th><th>Суть</th></tr>'
- +'<tr><td><b>Приказ № 657н</b></td><td>с 16.02.2026</td><td>10+ самозанятых с доходом от 25 000 ₽ в месяц, состоявших с вами в трудовых отношениях в прошлом квартале → ФНС передаёт данные в межведомственные комиссии</td></tr>'
- +'<tr><td><b>Приказ № 685н</b></td><td>с 10.01.2026</td><td>35+ самозанятых с доходом от 35 000 ₽ в месяц, сотрудничество дольше 3 месяцев, доля дохода от одного заказчика ≥75% → индикатор риска для проверок Роструда</td></tr>'
- +'<tr><td><b>Постановление № 760</b></td><td>с 01.10.2026</td><td>Для платформ: 60+ часов в месяц на одного заказчика 6 месяцев подряд → приостановка заказов. Прямому заказчику приостановки нет — но те же часы это и есть аргумент за переквалификацию</td></tr></table></div>'
+ +'<tr><td><b>Приказ № 657н</b></td><td>с 16.02.2026</td><td>более 10 самозанятых с доходом более 25 000 ₽ в месяц, состоявших с вами в трудовых отношениях в прошлом квартале → ФНС передаёт данные в межведомственные комиссии</td></tr>'
+ +'<tr><td><b>Приказ № 685н</b></td><td>с 10.01.2026</td><td>более 35 самозанятых с доходом более 35 000 ₽ в месяц, сотрудничество дольше 3 месяцев, доля дохода от одного заказчика ≥75% → индикатор риска для проверок Роструда</td></tr>'
+ +'<tr><td><b>Постановление № 760</b></td><td>с 01.10.2026</td><td>Для платформ: более 60 часов в месяц на одного заказчика 6 месяцев подряд → приостановка заказов. Прямому заказчику приостановки нет — но те же часы это и есть аргумент за переквалификацию</td></tr></table></div>'
  +'<div class="card"><div class="big" style="margin-bottom:10px">Быстрая проверка: срабатывают ли индикаторы у вас</div>'
  +'<div class="row">'
  +'<label class="f">Самозанятых, чел.<input id="gphCnt" type="number" value="12" min="0" oninput="gphCalc()"></label>'
@@ -535,25 +541,6 @@ function viewGph(){
  +'· раз в полугодие давать исполнителю месяц в пределах 60 часов — серия 60/6 сбрасывается, а признак «полной занятости» тает;<br>'
  +'· вести журнал осмотрительности: факт, что вы видели риск и реагировали, при проверке весит очень много.</div>'
  +'<div class="hint" style="margin-top:12px">Панель считает часы, доли дохода, серии месяцев подряд и флаг бывшего работника по каждому исполнителю — и ведёт журнал осмотрительности. Пилот для прямых заказчиков бесплатный: 15 минут на звонке — и вы увидите свои реальные цифры, а не условные.</div></div>';
-}
-function gphCalc(){
- const g=id=>document.getElementById(id);
- const cnt=+g('gphCnt').value||0,inc=+g('gphInc').value||0,mon=+g('gphMon').value||0,share=+g('gphShare').value||0,hrs=+g('gphHrs').value||0,former=g('gphFormer').checked;
- const i685=cnt>=35&&inc>=35000&&mon>=3&&share>=75;
- const i657=former&&cnt>=10&&inc>=25000;
- const conc=!i685&&cnt>0&&mon>=3&&share>=75;
- const hours=hrs>60;
- const al=(cls,ic,txt)=>'<div class="alert '+cls+'"><span class="ic">'+ic+'</span><div>'+txt+'</div></div>';
- let a='';
- if(i685)a+=al('red','🚨','<b>Сработал индикатор приказа № 685н:</b> '+cnt+' чел. с доходом от 35 000 ₽, сотрудничество дольше 3 месяцев, доля дохода от вас '+share+'%. Это индикатор риска для проверки Роструда — готовьте документы заранее.');
- if(i657)a+=al('red','🚨','<b>Сработал индикатор приказа № 657н:</b> '+cnt+' бывших работников с доходом от 25 000 ₽. ФНС передаёт данные в межведомственную комиссию — ждите вопросов по договорам ГПХ.');
- if(conc)a+=al('yel','⚠️','<b>Концентрация дохода:</b> '+share+'% от одного заказчика на протяжении '+mon+' мес. Ниже порога 685н по численности, но для этого исполнителя это уже признак переквалификации — думайте о разгрузке и диверсификации.');
- if(hours)a+=al('yel','⚠️','<b>Часы выше нормы:</b> в среднем '+hrs+' ч в месяц — формальный признак полной занятости. Платформе это грозит приостановкой 60/6, прямому заказчику — главным аргументом за переквалификацию.');
- if(!a)a+=al('grn','✅','<b>Индикаторы не сработали.</b> Но пороги близки для многих — перепроверяйте после найма или индексации ставок.');
- let hint='';
- if(!i685&&cnt>0)hint+='<div class="mut" style="margin-top:10px">До индикатора № 685н: ещё '+Math.max(0,35-cnt)+' чел., доход от 35 000 ₽, доля дохода от вас ≥75%, сотрудничество дольше 3 месяцев.</div>';
- if(!i657&&former)hint+='<div class="mut" style="margin-top:6px">До индикатора № 657н: ещё '+Math.max(0,10-cnt)+' бывших работников с доходом от 25 000 ₽.</div>';
- $('#gphRes').innerHTML=a+hint;
 }
 </script>
 <script>
@@ -597,7 +584,23 @@ function sendFb(ch){
 #fbBtn:hover{background:#eef2ff}
 </style>
 <script>
-/* ---------- запрет 422-ФЗ v3: живой ввод даты (текст+календарь), удаление статичной плашки, разбор id без regex ---------- */
+/* ---------- запрет 422-ФЗ v3: живая дата, ручной ввод, плашки без застревания; + бейдж копии ---------- */
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtRu(iso){const p=iso.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function isoOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseDateAny(v){
+ if(!v)return null;
+ v=v.trim().replace(/\//g,'.').replace(/[.,\-–\s]+/g,'.');
+ let m=v.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+ if(!m)m=v.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})$/);
+ if(!m)return null;
+ let a,b,c;
+ if(m[1].length===4){a=+m[1];b=+m[2];c=+m[3];}else{c=+m[1];b=+m[2];a=+m[3];}
+ if(b<1||b>12||c<1||c>31)return null;
+ const d=new Date(a,b-1,c);
+ if(d.getFullYear()!==a||d.getMonth()!==b-1||d.getDate()!==c)return null;
+ return a+'-'+String(b).padStart(2,'0')+'-'+String(c).padStart(2,'0');
+}
 function termInfo(ex){
  if(!ex||!ex.formerEmp||!ex.termDate)return null;
  const d=new Date(ex.termDate+'T00:00:00');if(isNaN(d))return null;
@@ -605,99 +608,128 @@ function termInfo(ex){
  let m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
  if(now.getDate()<d.getDate())m--;
  if(m<0)m=0;
- const fmt=x=>('0'+x.getDate()).slice(-2)+'.'+('0'+(x.getMonth()+1)).slice(-2)+'.'+x.getFullYear();
  const e24=new Date(d);e24.setMonth(e24.getMonth()+24);
  const e36=new Date(d);e36.setMonth(e36.getMonth()+36);
- if(m<24)return{m,left:24-m,until:fmt(e24),cls:'red'};
- if(m<36)return{m,until:fmt(e36),cls:'yel'};
+ if(m<24)return{m,left:24-m,until:fmtRu(isoOf(e24)),cls:'red'};
+ if(m<36)return{m,until:fmtRu(isoOf(e36)),cls:'yel'};
  return{m,cls:'grn'};
-}
-function vru(s){if(!s)return '';const p=s.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
-function termChk(d,mo,y){
- if(!y||!mo||!d||mo<1||mo>12||d<1)return null;
- const dt=new Date(y,mo-1,d);
- if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d)return null;
- return y+'-'+('0'+mo).slice(-2)+'-'+('0'+d).slice(-2);
-}
-function parseTerm(v){
- v=(v||'').trim();
- if(!v)return '';
- let p=v.split('.');
- if(p.length===3)return termChk(+p[0],+p[1],+p[2]);
- p=v.split('/');
- if(p.length===3)return termChk(+p[0],+p[1],+p[2]);
- p=v.split('-');
- if(p.length===3){
-  if(p[0].length===4)return termChk(+p[2],+p[1],+p[0]);
-  return termChk(+p[0],+p[1],+p[2]);
- }
- return null;
 }
 function termAlert(ex){
  const t=termInfo(ex);if(!t)return '';
  const id=' id="termAlert"';
- if(t.cls==='red')return '<div'+id+' class="alert red" style="margin-top:10px"><span class="ic">⛔</span><div><b>Запрет 422-ФЗ действует:</b> с даты увольнения ('+vru(ex.termDate)+') прошло '+t.m+' мес. Сотрудничество с бывшим работодателем запрещено ещё '+t.left+' мес. — до '+t.until+'. Доход от вас не признаётся НПД: чеки могут аннулировать, расходы — не зачесть, а при проверке это готовое доказательство подмены.</div></div>';
+ if(t.cls==='red')return '<div'+id+' class="alert red" style="margin-top:10px"><span class="ic">⛔</span><div><b>Запрет 422-ФЗ действует:</b> с даты увольнения ('+fmtRu(ex.termDate)+') прошло '+t.m+' мес. Сотрудничество с бывшим работодателем запрещено ещё '+t.left+' мес. — до '+t.until+'. Доход от вас не признаётся НПД: чеки могут аннулировать, расходы — не зачесть.</div></div>';
  if(t.cls==='yel')return '<div'+id+' class="alert yel" style="margin-top:10px"><span class="ic">⏳</span><div><b>Запрет 422-ФЗ истёк:</b> с даты увольнения прошло '+t.m+' мес. Сотрудничество разрешено, но история трудовых отношений видна ФНС три года — договор и график держите подрядными.</div></div>';
  return '<div'+id+' class="alert grn" style="margin-top:10px"><span class="ic">✅</span><div><b>Ограничений 422-ФЗ нет:</b> с даты увольнения прошло '+t.m+' мес. Исполнителя считайте обычным контрагентом — признаки переквалификации всё равно проверяйте.</div></div>';
 }
 function execIdOnPage(){
  const b=document.querySelector('button[onclick*="saveExecEdits"]');if(!b)return null;
  const oc=b.getAttribute('onclick')||'';
- const i=oc.indexOf("'"),j=i>=0?oc.indexOf("'",i+1):-1;
- return (i>=0&&j>i)?oc.slice(i+1,j):null;
-}
-function buildTermField(ex){
- const f=document.createElement('label');f.className='f';f.id='eTermWrap';
- f.innerHTML='Дата увольнения'
-  +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px">'
-  +'<input type="text" id="eTermTxt" inputmode="numeric" placeholder="ДД.ММ.ГГГГ" value="'+(ex&&ex.termDate?vru(ex.termDate):'')+'" style="max-width:150px">'
-  +'<input type="date" id="eTerm" value="'+(ex&&ex.termDate?ex.termDate:'')+'" style="max-width:170px" title="Или выберите дату в календаре">'
-  +'<span class="mut" id="eTermHint">введите вручную или выберите в календаре</span>'
-  +'</div>';
- return f;
+ const i=oc.indexOf("saveExecEdits('");
+ if(i<0)return null;
+ const j=oc.indexOf("'",i+15);
+ return j<0?null:oc.slice(i+15,j);
 }
 function toggleTermField(){
  const c=document.getElementById('eFormer');if(!c)return;
- const wrap=c.closest('label'),host=wrap.parentElement;
- const f=document.getElementById('eTermWrap');
- if(c.checked){if(!f){const id=execIdOnPage(),ex=id?S.executors.find(e=>e.id===id):null;host.insertBefore(buildTermField(ex),wrap.nextSibling);}}
- else if(f)f.remove();
+ const wrap=c.closest('label')||c.parentElement,host=wrap.parentElement;
+ let f=document.getElementById('eTermWrap');
+ if(c.checked){
+  if(!f){
+   f=document.createElement('label');f.className='f';f.id='eTermWrap';
+   f.innerHTML='Дата увольнения<span style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="eTermTxt" placeholder="ДД.ММ.ГГГГ" style="flex:1;min-width:130px"><input type="date" id="eTerm" style="width:150px"></span><span class="termErr" id="eTermErr" style="display:none"></span>';
+   host.insertBefore(f,wrap.nextSibling);
+  }
+ }else if(f)f.remove();
 }
-/* сохранение: дата + журнал только при смене зоны */
+function liveSaveTerm(){
+ const id=execIdOnPage();if(!id)return;
+ const ex=S.executors.find(e=>e.id===id);if(!ex)return;
+ const c=document.getElementById('eFormer'),f=document.getElementById('eTerm');
+ if(c)ex.formerEmp=c.checked;
+ if(ex.formerEmp&&f&&f.value)ex.termDate=f.value;else delete ex.termDate;
+ const t=termInfo(ex),prev=ex.__termCls||'';
+ if(t&&t.cls!==prev){
+  if(t.cls==='red')jlog('ЗАПРЕТ 422-ФЗ: сотрудничество с '+ex.name+' запрещено до '+t.until+' (уволен '+fmtRu(ex.termDate)+')');
+  else if(t.cls==='yel')jlog(ex.name+': запрет 422-ФЗ истёк — режим подрядчика подтверждён');
+  ex.__termCls=t.cls;
+ }
+ if(!t)delete ex.__termCls;
+ save();
+ refreshTermUI();
+ updateBackupBadge();
+}
+function refreshTermUI(){
+ const id=execIdOnPage(),ex=id?S.executors.find(e=>e.id===id):null;
+ /* базовый алерт 657н: скрываем, когда есть дата */
+ const base=[].find.call(document.querySelectorAll('#view .alert'),a=>a.textContent.indexOf('Индикатор 657н')>=0);
+ if(base)base.style.display=(ex&&ex.formerEmp&&ex.termDate)?'none':'';
+ /* плашка срока: удалить и вставить заново */
+ const oa=document.getElementById('termAlert');if(oa)oa.remove();
+ if(ex&&ex.formerEmp&&ex.termDate){
+  const html=termAlert(ex);
+  if(base)base.insertAdjacentHTML('afterend',html);
+  else{
+   const big=[].find.call(document.querySelectorAll('#view .card .big'),x=>x.textContent.indexOf('Данные исполнителя')>=0);
+   const cardEl=big?big.closest('.card'):null;
+   if(cardEl)cardEl.insertAdjacentHTML('afterend',html);
+  }
+ }
+ /* баннер на панели */
+ const ob=document.getElementById('banBanner');if(ob)ob.remove();
+ if(tab==='dash'){
+  const banned=S.executors.filter(e=>{const t=termInfo(e);return t&&t.cls==='red';});
+  if(banned.length){
+   const v=document.getElementById('view');
+   const d=document.createElement('div');d.id='banBanner';d.className='card';
+   d.innerHTML='<div class="alert red" style="margin:0"><span class="ic">⛔</span><div><b>Запрет 422-ФЗ:</b> сотрудничество запрещено с '+banned.length+' исполнител'+(banned.length===1?'ем':'ями')+' — '+banned.map(e=>'<b>'+e.name+'</b>').join(', ')+'. Доход от вас не признаётся НПД.</div></div>';
+   v.insertBefore(d,v.firstChild);
+  }
+ }
+}
+function bindTerm(){
+ const t=document.getElementById('eTermTxt'),d=document.getElementById('eTerm'),err=document.getElementById('eTermErr');
+ if(!t||t.dataset.b)return;t.dataset.b='1';
+ const showErr=msg=>{err.textContent=msg;err.style.display='';t.style.borderColor='var(--bad)';};
+ const clearErr=()=>{err.style.display='none';t.style.borderColor='';};
+ const apply=quiet=>{
+  const v=t.value.trim();
+  if(!v){clearErr();d.value='';liveSaveTerm();return;}
+  const iso=parseDateAny(v);
+  if(!iso){if(!quiet)showErr('Не разобрал дату — формат ДД.ММ.ГГГГ');return;}
+  if(iso>todayISO()){if(!quiet)showErr('Дата не может быть в будущем');return;}
+  clearErr();t.value=fmtRu(iso);d.value=iso;liveSaveTerm();
+ };
+ t.addEventListener('input',()=>apply(true));
+ t.addEventListener('blur',()=>apply(false));
+ t.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply(false);t.blur();}});
+ d.addEventListener('change',()=>{if(d.value){clearErr();t.value=fmtRu(d.value);liveSaveTerm();}});
+}
+/* сохранение по кнопке тоже подхватывает дату */
 (function(){
  const _save=saveExecEdits;
  saveExecEdits=function(id){
   const ex=S.executors.find(e=>e.id===id);
   if(ex){
-   const c=document.getElementById('eFormer');
-   if(c)ex.formerEmp=c.checked;
-   const f=document.getElementById('eTerm');
-   if(ex.formerEmp)ex.termDate=(f&&f.value)?f.value:'';else delete ex.termDate;
-   const t=termInfo(ex),prev=ex.__termCls||'';
-   if(t&&t.cls!==prev){
-    if(t.cls==='red')jlog('ЗАПРЕТ 422-ФЗ: сотрудничество с '+ex.name+' запрещено до '+t.until+' (уволен '+vru(ex.termDate)+')');
-    else if(t.cls==='yel')jlog(ex.name+': запрет 422-ФЗ истёк — режим подрядчика подтверждён');
-    ex.__termCls=t.cls;
+   const c=document.getElementById('eFormer'),f=document.getElementById('eTerm');
+   if(c){
+    if(c.checked&&f&&f.value)ex.termDate=f.value;
+    else delete ex.termDate;
    }
-   if(!t)delete ex.__termCls;
   }
   _save(id);
  };
 })();
-/* карточка: уточнённая подсказка */
+/* подсказка в карточке */
 (function(){
  const _vd=viewDetail;
- viewDetail=function(ex){return _vd(ex).replace('Уточните дату увольнения.','Укажите дату увольнения — панель рассчитает срок запрета по 422-ФЗ.');};
+ viewDetail=function(ex){return _vd(ex).replace('Уточните дату увольнения.','Укажите дату увольнения в «Данных исполнителя» — панель рассчитает срок запрета по 422-ФЗ.');};
 })();
-/* вкладка «Риски ГПХ»: сводный баннер + строгие формулировки порогов */
+/* вкладка «Риски ГПХ»: сводный баннер запрета */
 (function(){
  const _vg=viewGph;
  viewGph=function(){
-  let out=_vg();
-  out=out.replace('35+ самозанятых с доходом от 35 000 ₽ в месяц','более 35 самозанятых с доходом более 35 000 ₽ в месяц')
-         .replace('10+ самозанятых с доходом от 25 000 ₽ в месяц','более 10 самозанятых с доходом более 25 000 ₽ в месяц')
-         .replace('Для платформ: 60+ часов','Для платформ: более 60 часов');
   const banned=S.executors.map(e=>({e,t:termInfo(e)})).filter(x=>x.t&&x.t.cls==='red');
+  let out=_vg();
   if(banned.length){
    const names=banned.map(x=>'<b>'+x.e.name+'</b> (запрет до '+x.t.until+')').join(', ');
    out='<div class="card" style="border-color:var(--bad)"><div class="alert red" style="margin:0"><span class="ic">⛔</span><div><b>Сотрудничество запрещено по 422-ФЗ с '+banned.length+' исполнител'+(banned.length===1?'ем':'ями')+':</b> '+names+'. Доход от вас не признаётся НПД — чеки могут аннулировать, расходы не зачтут.</div></div></div>'+out;
@@ -742,86 +774,35 @@ function gphCalc(){
  }
  $('#gphRes').innerHTML=a+hint;
 }
-/* живое обновление плашки срока без перерисовки страницы */
-function updateTermPlates(ex){
- const t=termInfo(ex),prev=ex.__termCls||'';
- if(t&&t.cls!==prev){
-  if(t.cls==='red')jlog('ЗАПРЕТ 422-ФЗ: сотрудничество с '+ex.name+' запрещено до '+t.until+' (уволен '+vru(ex.termDate)+')');
-  else if(t.cls==='yel')jlog(ex.name+': запрет 422-ФЗ истёк — режим подрядчика подтверждён');
-  ex.__termCls=t.cls;
- }
- if(!t)delete ex.__termCls;
- const oa=document.getElementById('termAlert');if(oa)oa.remove();
- if(t){
-  let holder=null;
-  const bl=document.querySelectorAll('#view .card .big');
-  for(let i=0;i<bl.length;i++){if(bl[i].textContent.indexOf('Данные исполнителя')>=0){holder=bl[i].closest('.card');break;}}
-  if(holder)holder.insertAdjacentHTML('beforebegin',termAlert(ex));
- }
+/* бейдж напоминания о копии */
+function updateBackupBadge(){
+ const b=document.getElementById('bkBadge');if(!b)return;
+ const last=S.lastBackup||0;
+ const days=last?Math.floor((Date.now()-last)/864e5):Infinity;
+ if(days>=30){
+  b.style.display='';
+  b.textContent=last?('Копия не сохранялась '+days+' дн. — сделайте резервную копию'):'Данные хранятся только в этом браузере — сделайте резервную копию';
+  b.onclick=function(){go('set');};
+ }else b.style.display='none';
 }
-/* связывание полей ввода даты: текст + календарь */
-function bindTermInputs(ex){
- const t=document.getElementById('eTermTxt'),p=document.getElementById('eTerm'),h=document.getElementById('eTermHint');
- if(!t||!p||!h||t.dataset.b)return;
- t.dataset.b=1;
- const setHint=msg=>{h.textContent=msg||'';t.style.borderColor=msg?'var(--bad)':'';};
- const apply=iso=>{
-  if(iso===''){
-   p.value='';setHint('');
-   if(ex&&(ex.termDate||ex.__termCls)){delete ex.termDate;delete ex.__termCls;save();render();}
-   return;
-  }
-  if(iso===null){setHint('Не разобрал дату — формат ДД.ММ.ГГГГ');return;}
-  p.value=iso;t.value=vru(iso);setHint('');
-  if(ex){ex.termDate=iso;save();updateTermPlates(ex);}
- };
- t.addEventListener('input',()=>{
-  const raw=t.value.trim();
-  if(raw===''){apply('');return;}
-  const iso=parseTerm(raw);
-  if(iso)apply(iso);
- });
- t.addEventListener('blur',()=>{
-  const raw=t.value.trim();
-  if(raw&&!parseTerm(raw))setHint('Не разобрал дату — формат ДД.ММ.ГГГГ');
-  else setHint('');
- });
- p.addEventListener('change',()=>apply(p.value||''));
-}
-/* пост-обработка: убираем статичную плашку 657н, когда дата известна; ставим живую */
+/* пост-обработка после каждой отрисовки */
 function patchPost(){
  const c=document.getElementById('eFormer');
  if(c){
   if(c.checked&&!document.getElementById('eTermWrap')){
-   const wrap=c.closest('label'),host=wrap.parentElement;
-   const id=execIdOnPage(),ex=id?S.executors.find(e=>e.id===id):null;
-   host.insertBefore(buildTermField(ex),wrap.nextSibling);
+   toggleTermField();
+   const ex=(()=>{const id=execIdOnPage();return id?S.executors.find(e=>e.id===id):null;})();
+   if(ex&&ex.termDate){
+    const t=document.getElementById('eTermTxt'),d=document.getElementById('eTerm');
+    if(t)t.value=fmtRu(ex.termDate);
+    if(d)d.value=ex.termDate;
+   }
   }
-  if(!c.dataset.tb){c.dataset.tb=1;c.addEventListener('change',()=>{toggleTermField();const id2=execIdOnPage();if(id2)saveExecEdits(id2);});}
-  const id=execIdOnPage(),ex=id?S.executors.find(e=>e.id===id):null;
-  const t=ex&&ex.formerEmp&&ex.termDate?termInfo(ex):null;
-  if(t){
-   let base657=null;
-   const list=document.querySelectorAll('#view .alert');
-   for(let i=0;i<list.length;i++){if(list[i].textContent.indexOf('Индикатор 657н')>=0){base657=list[i];break;}}
-   let holder=null;
-   const bl=document.querySelectorAll('#view .card .big');
-   for(let i=0;i<bl.length;i++){if(bl[i].textContent.indexOf('Данные исполнителя')>=0){holder=bl[i].closest('.card');break;}}
-   if(holder){if(base657)base657.remove();}
-  }
-  updateTermPlates(ex);
-  bindTermInputs(ex);
+  if(!c.dataset.tb){c.dataset.tb='1';c.addEventListener('change',()=>{toggleTermField();bindTerm();liveSaveTerm();});}
+  bindTerm();
  }
- const ob=document.getElementById('banBanner');if(ob)ob.remove();
- if(tab==='dash'){
-  const banned=S.executors.filter(e=>{const t=termInfo(e);return t&&t.cls==='red';});
-  if(banned.length){
-   const v=document.getElementById('view');
-   const d=document.createElement('div');d.id='banBanner';d.className='card';
-   d.innerHTML='<div class="alert red" style="margin:0"><span class="ic">⛔</span><div><b>Запрет 422-ФЗ:</b> сотрудничество запрещено с '+banned.length+' исполнител'+(banned.length===1?'ем':'ями')+' — '+banned.map(e=>'<b>'+e.name+'</b>').join(', ')+'. Доход от вас не признаётся НПД.</div></div>';
-   v.insertBefore(d,v.firstChild);
-  }
- }
+ refreshTermUI();
+ updateBackupBadge();
 }
 (function(){
  const _r=render;
