@@ -499,6 +499,64 @@ renderNav();render();
 })();
 </script>
 <script>
+/* ---------- раздел «Риски ГПХ»: заказчики без платформы ---------- */
+TABS.push(['gph','Риски ГПХ']);
+const _oldRender=render;
+render=function(){
+ if(tab==='gph'){$('#view').innerHTML=viewGph();gphCalc();return;}
+ _oldRender();};
+if(typeof renderNav==='function')renderNav();
+function viewGph(){
+ return '<div class="card"><div class="big">ГПХ без платформы: те же риски — и никаких предупреждений</div>'
+ +'<div class="mut" style="margin-top:8px">Приостановка по норме 60/6 грозит только работе через платформы. Но переквалификация ГПХ в трудовой договор — риск для любого заказчика с самозанятыми: индикаторы приказов № 657н и № 685н действуют и на прямые договоры. Предупреждений не будет — только запрос от ФНС, проверка Роструда и доначисление НДФЛ с взносами за весь период.</div></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Три нормы, которые касаются вас</div>'
+ +'<table><tr><th>Норма</th><th>Когда</th><th>Суть</th></tr>'
+ +'<tr><td><b>Приказ № 657н</b></td><td>с 16.02.2026</td><td>10+ самозанятых с доходом от 25 000 ₽ в месяц, состоявших с вами в трудовых отношениях в прошлом квартале → ФНС передаёт данные в межведомственные комиссии</td></tr>'
+ +'<tr><td><b>Приказ № 685н</b></td><td>с 10.01.2026</td><td>35+ самозанятых с доходом от 35 000 ₽ в месяц, сотрудничество дольше 3 месяцев, доля дохода от одного заказчика ≥75% → индикатор риска для проверок Роструда</td></tr>'
+ +'<tr><td><b>Постановление № 760</b></td><td>с 01.10.2026</td><td>Для платформ: 60+ часов в месяц на одного заказчика 6 месяцев подряд → приостановка заказов. Прямому заказчику приостановки нет — но те же часы это и есть аргумент за переквалификацию</td></tr></table></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Быстрая проверка: срабатывают ли индикаторы у вас</div>'
+ +'<div class="row">'
+ +'<label class="f">Самозанятых, чел.<input id="gphCnt" type="number" value="12" min="0" oninput="gphCalc()"></label>'
+ +'<label class="f">Средний доход в месяц, ₽<input id="gphInc" type="number" value="30000" min="0" oninput="gphCalc()"></label>'
+ +'<label class="f">Сотрудничество, месяцев<input id="gphMon" type="number" value="5" min="0" oninput="gphCalc()"></label>'
+ +'<label class="f">Доля дохода от вас, %<input id="gphShare" type="number" value="60" min="0" max="100" oninput="gphCalc()"></label>'
+ +'<label class="f">Часов в месяц на человека<input id="gphHrs" type="number" value="45" min="0" oninput="gphCalc()"></label>'
+ +'<label class="f" style="justify-content:flex-end"><span style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink)"><input id="gphFormer" type="checkbox" onchange="gphCalc()" style="width:18px;height:18px">Есть бывшие работники</span></label>'
+ +'</div><div id="gphRes" style="margin-top:14px"></div></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Признаки переквалификации, которые проверяют на практике</div>'
+ +'<div class="mut">· согласованный режим работы, рабочее место, инструменты заказчика;<br>'
+ +'· оплата не реже двух раз в месяц, одинаковая сумма независимо от результата;<br>'
+ +'· единственный источник дохода исполнителя и многолетнее сотрудничество с одним заказчиком;<br>'
+ +'· работа под прямыми указаниями, без своего оборудования и сотрудников;<br>'
+ +'· договоры ГПХ повторяют функции бывшей должности — именно на это нацелен приказ № 657н.</div></div>'
+ +'<div class="card"><div class="big" style="margin-bottom:10px">Что с этим делать</div>'
+ +'<div class="mut">· вести учёт часов и долей дохода по каждому исполнителю — панель считает и то, и другое;<br>'
+ +'· оформлять договоры как договоры подряда: результат, сроки, самостоятельный график;<br>'
+ +'· раз в полугодие давать исполнителю месяц в пределах 60 часов — серия 60/6 сбрасывается, а признак «полной занятости» тает;<br>'
+ +'· вести журнал осмотрительности: факт, что вы видели риск и реагировали, при проверке весит очень много.</div>'
+ +'<div class="hint" style="margin-top:12px">Панель считает часы, доли дохода, серии месяцев подряд и флаг бывшего работника по каждому исполнителю — и ведёт журнал осмотрительности. Пилот для прямых заказчиков бесплатный: 15 минут на звонке — и вы увидите свои реальные цифры, а не условные.</div></div>';
+}
+function gphCalc(){
+ const g=id=>document.getElementById(id);
+ const cnt=+g('gphCnt').value||0,inc=+g('gphInc').value||0,mon=+g('gphMon').value||0,share=+g('gphShare').value||0,hrs=+g('gphHrs').value||0,former=g('gphFormer').checked;
+ const i685=cnt>=35&&inc>=35000&&mon>=3&&share>=75;
+ const i657=former&&cnt>=10&&inc>=25000;
+ const conc=!i685&&cnt>0&&mon>=3&&share>=75;
+ const hours=hrs>60;
+ const al=(cls,ic,txt)=>'<div class="alert '+cls+'"><span class="ic">'+ic+'</span><div>'+txt+'</div></div>';
+ let a='';
+ if(i685)a+=al('red','🚨','<b>Сработал индикатор приказа № 685н:</b> '+cnt+' чел. с доходом от 35 000 ₽, сотрудничество дольше 3 месяцев, доля дохода от вас '+share+'%. Это индикатор риска для проверки Роструда — готовьте документы заранее.');
+ if(i657)a+=al('red','🚨','<b>Сработал индикатор приказа № 657н:</b> '+cnt+' бывших работников с доходом от 25 000 ₽. ФНС передаёт данные в межведомственную комиссию — ждите вопросов по договорам ГПХ.');
+ if(conc)a+=al('yel','⚠️','<b>Концентрация дохода:</b> '+share+'% от одного заказчика на протяжении '+mon+' мес. Ниже порога 685н по численности, но для этого исполнителя это уже признак переквалификации — думайте о разгрузке и диверсификации.');
+ if(hours)a+=al('yel','⚠️','<b>Часы выше нормы:</b> в среднем '+hrs+' ч в месяц — формальный признак полной занятости. Платформе это грозит приостановкой 60/6, прямому заказчику — главным аргументом за переквалификацию.');
+ if(!a)a+=al('grn','✅','<b>Индикаторы не сработали.</b> Но пороги близки для многих — перепроверяйте после найма или индексации ставок.');
+ let hint='';
+ if(!i685&&cnt>0)hint+='<div class="mut" style="margin-top:10px">До индикатора № 685н: ещё '+Math.max(0,35-cnt)+' чел., доход от 35 000 ₽, доля дохода от вас ≥75%, сотрудничество дольше 3 месяцев.</div>';
+ if(!i657&&former)hint+='<div class="mut" style="margin-top:6px">До индикатора № 657н: ещё '+Math.max(0,10-cnt)+' бывших работников с доходом от 25 000 ₽.</div>';
+ $('#gphRes').innerHTML=a+hint;
+}
+</script>
+<script>
 /* ---------- обратная связь ---------- */
 const FB_MAX='https://max.ru/u/f9LHodD0cOI9psC0RdXXMaSz_1m5dDL3GrmAiibA_t9dOzafM80gX6DqKeY';
 const FB_TG='https://t.me/LeadingSpec?text=';
@@ -526,10 +584,8 @@ function sendFb(ch){
  if(ch==='copy'){copyText(msg,'Отзыв скопирован — отправьте любым способом');closeFb();return;}
  if(ch==='mail'){window.open('mailto:'+FB_MAIL+'?subject='+encodeURIComponent('Отзыв о «Норма»')+'&body='+encodeURIComponent(msg),'_blank');closeFb();return;}
  if(ch==='tg'||ch==='wa'){window.open((ch==='tg'?FB_TG:FB_WA)+encodeURIComponent(msg),'_blank');closeFb();return;}
- /* MAX не поддерживает предзаполнение текста — копируем отзыв и открываем профиль */
  copyText(msg,'Текст отзыва скопирован — вставьте его в чат Max');
- window.open(FB_MAX,'_blank');
- closeFb();
+ window.open(FB_MAX,'_blank');closeFb();
 }
 (function(){
  const b=document.createElement('button');b.id='fbBtn';b.textContent='💬 Отзыв';b.onclick=openFb;
